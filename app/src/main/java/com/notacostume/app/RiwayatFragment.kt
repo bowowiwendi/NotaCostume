@@ -44,6 +44,8 @@ class RiwayatFragment : Fragment() {
         b.rvRiwayat.layoutManager = LinearLayoutManager(requireContext())
         b.rvRiwayat.adapter = adapter
 
+        b.btnExport.setOnClickListener { exportCsv() }
+
         b.etSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 query = s?.toString()?.trim().orEmpty()
@@ -97,5 +99,14 @@ class RiwayatFragment : Fragment() {
             }
             .setNegativeButton(R.string.batal, null)
             .show()
+    }
+
+    private fun exportCsv() {
+        val name = CsvExporter.export(requireContext(), db.getAll())
+        if (name != null) {
+            Toast.makeText(requireContext(), getString(R.string.export_done, name), Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(requireContext(), R.string.export_empty, Toast.LENGTH_SHORT).show()
+        }
     }
 }

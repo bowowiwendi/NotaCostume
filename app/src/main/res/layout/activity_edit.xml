@@ -4,15 +4,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F4F5FA">
+    android:background="?attr/colorSurface">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/md_primary"
+        android:background="?attr/colorSurfaceContainer"
         app:title="@string/edit_title"
-        app:titleTextColor="@color/white"
+        app:titleTextColor="?attr/colorOnSurface"
         app:navigationIcon="@android:drawable/ic_menu_revert" />
 
     <androidx.fragment.app.FragmentContainerView

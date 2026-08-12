@@ -33,6 +33,16 @@
     <string name="share_title">Bagikan Nota</string>
     <string name="share_text">Nota pembelian %1$s</string>
 
+    <string name="export_csv">Export CSV</string>
+    <string name="export_done">File CSV tersimpan di folder Downloads: %1$s</string>
+    <string name="export_empty">Belum ada nota untuk di-export</string>
+
+    <string name="menu_theme">Tema</string>
+    <string name="theme_title">Pilih Tema</string>
+    <string name="theme_sistem">Ikuti Sistem</string>
+    <string name="theme_terang">Terang</string>
+    <string name="theme_gelap">Gelap</string>
+
     <string name="nota_terhapus">Nota dihapus</string>
     <string name="nota_diubah">Nota diperbarui</string>
     <string name="pdf_tersimpan">PDF tersimpan di folder Downloads: %1$s</string>

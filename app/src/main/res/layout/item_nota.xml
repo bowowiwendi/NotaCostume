@@ -27,14 +27,14 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textColor="#888888"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="12sp" />
 
             <TextView
                 android:id="@+id/tvInfo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/md_primary"
+                android:textColor="?attr/colorPrimary"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
@@ -44,29 +44,6 @@
                 android:layout_marginStart="4dp"
                 android:src="@drawable/ic_chevron"
                 android:importantForAccessibility="no" />
-
-            <!-- Action buttons -->
-            <ImageButton
-                android:id="@+id/btnEdit"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_marginStart="4dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/menu_edit"
-                android:src="@android:drawable/ic_menu_edit"
-                android:tint="?attr/colorPrimary"
-                app:iconPadding="0dp" />
-
-            <ImageButton
-                android:id="@+id/btnHapus"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_marginStart="4dp"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/btn_hapus"
-                android:src="@android:drawable/ic_menu_delete"
-                android:tint="?attr/colorError"
-                app:iconPadding="0dp" />
         </LinearLayout>
 
         <TextView
@@ -74,17 +51,54 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:textSize="16sp"
-            android:textStyle="bold"
+            android:ellipsize="end"
             android:maxLines="2"
-            android:ellipsize="end" />
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/tvCostume"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:textColor="#666666"
+            android:textColor="?attr/colorOnSurfaceVariant"
             android:textSize="13sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEdit"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:minHeight="40dp"
+                android:text="@string/menu_edit"
+                android:textSize="13sp"
+                app:cornerRadius="10dp"
+                app:icon="@drawable/ic_edit_note"
+                app:iconSize="18dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnHapus"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:minHeight="40dp"
+                android:text="@string/btn_hapus"
+                android:textColor="?attr/colorError"
+                android:textSize="13sp"
+                app:cornerRadius="10dp"
+                app:icon="@drawable/ic_delete"
+                app:iconSize="18dp"
+                app:iconTint="?attr/colorError" />
+        </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
