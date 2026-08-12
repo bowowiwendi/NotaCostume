@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Nota Costume</string>
+    <string name="toko_nama">TOKO COSTUME</string>
+    <string name="toko_alamat">Jl. Contoh Raya No. 123, Kota</string>
+
+    <string name="hero_title">Nota Pembelian</string>
+    <string name="hero_sub">Catat barang yang dibeli dengan cepat.</string>
+
+    <string name="label_toko">Nama Toko (opsional)</string>
+    <string name="label_tanggal">Tanggal Transaksi</string>
+    <string name="label_barang">Nama Barang</string>
+    <string name="label_jumlah">Jumlah</string>
+    <string name="label_harga">Harga (Rp)</string>
+    <string name="label_catatan">Catatan (opsional)</string>
+
+    <string name="section_barang">Daftar Barang</string>
+    <string name="btn_tambah_barang">Tambah Barang</string>
+    <string name="hapus_barang">Hapus baris barang ini</string>
+
+    <string name="summary_total">Total Harga</string>
+    <string name="btn_simpan">Simpan Nota</string>
+    <string name="riwayat_title">Riwayat Nota</string>
+    <string name="empty_state">Belum ada nota.\nYuk buat nota pertama!</string>
+
+    <string name="btn_print">Cetak</string>
+    <string name="btn_pdf">Simpan PDF</string>
+    <string name="btn_hapus">Hapus</string>
+    <string name="btn_bagikan">Bagikan Foto</string>
+    <string name="menu_form">Buat Nota</string>
+    <string name="menu_riwayat">Riwayat</string>
+    <string name="share_title">Bagikan Nota</string>
+    <string name="share_text">Nota pembelian %1$s</string>
+
+    <string name="nota_terhapus">Nota dihapus</string>
+    <string name="nota_diubah">Nota diperbarui</string>
+    <string name="pdf_tersimpan">PDF tersimpan di folder Downloads: %1$s</string>
+    <string name="gagal_pdf">Gagal menyimpan PDF</string>
+    <string name="isi_lengkap">Isi minimal satu nama barang</string>
+    <string name="nota_disimpan">Nota berhasil disimpan</string>
+    <string name="hapus_konfirmasi">Hapus nota ini?</string>
+    <string name="ya">Ya, Hapus</string>
+    <string name="batal">Batal</string>
+    <string name="edit_title">Edit Nota</string>
+    <string name="menu_edit">Edit</string>
+    <string name="search_hint">Cari nota…</string>
+</resources>
