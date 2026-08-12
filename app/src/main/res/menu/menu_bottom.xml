@@ -8,4 +8,8 @@
         android:id="@+id/menu_riwayat"
         android:icon="@drawable/ic_history"
         android:title="@string/menu_riwayat" />
+    <item
+        android:id="@+id/menu_settings"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="@string/menu_settings" />
 </menu>

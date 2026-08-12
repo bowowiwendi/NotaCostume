@@ -44,6 +44,29 @@
                 android:layout_marginStart="4dp"
                 android:src="@drawable/ic_chevron"
                 android:importantForAccessibility="no" />
+
+            <!-- Action buttons -->
+            <ImageButton
+                android:id="@+id/btnEdit"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/menu_edit"
+                android:src="@android:drawable/ic_menu_edit"
+                android:tint="?attr/colorPrimary"
+                app:iconPadding="0dp" />
+
+            <ImageButton
+                android:id="@+id/btnHapus"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/btn_hapus"
+                android:src="@android:drawable/ic_menu_delete"
+                android:tint="?attr/colorError"
+                app:iconPadding="0dp" />
         </LinearLayout>
 
         <TextView

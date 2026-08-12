@@ -6,7 +6,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.notacostume.app.databinding.ItemNotaBinding
 
 class NotaAdapter(
-    private val onClick: (Nota) -> Unit
+    private val onClick: (Nota) -> Unit,
+    private val onEdit: (Nota) -> Unit,
+    private val onDelete: (Nota) -> Unit
 ) : RecyclerView.Adapter<NotaAdapter.VH>() {
 
     private val items = mutableListOf<Nota>()
@@ -34,7 +36,10 @@ class NotaAdapter(
             b.tvPelanggan.text = nota.deskripsi.ifBlank { nota.toko }
             b.tvCostume.text = "${nota.jumlahBarang} item" + if (nota.toko.isNotBlank()) " dari ${nota.toko}" else ""
             b.tvInfo.text = Rupiah.format(nota.total)
+            
             b.root.setOnClickListener { onClick(nota) }
+            b.btnEdit.setOnClickListener { onEdit(nota) }
+            b.btnHapus.setOnClickListener { onDelete(nota) }
         }
     }
 }
