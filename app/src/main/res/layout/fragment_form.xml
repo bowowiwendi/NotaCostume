@@ -16,7 +16,7 @@
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_hero"
+            android:background="?attr/colorPrimaryContainer"
             android:padding="20dp">
 
             <LinearLayout
@@ -28,7 +28,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/hero_title"
-                    android:textColor="@color/white"
+                    android:textColor="?attr/colorOnPrimaryContainer"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
@@ -37,8 +37,9 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="@string/hero_sub"
-                    android:textColor="#DDDDDD"
-                    android:textSize="13sp" />
+                    android:textColor="?attr/colorOnPrimaryContainer"
+                    android:textSize="13sp"
+                    android:alpha="0.8" />
             </LinearLayout>
         </FrameLayout>
 
@@ -97,7 +98,7 @@
                     android:text="@string/section_barang"
                     android:textSize="15sp"
                     android:textStyle="bold"
-                    android:textColor="@color/indigo_900" />
+                    android:textColor="?attr/colorPrimary" />
 
                 <LinearLayout
                     android:id="@+id/llItems"
@@ -138,7 +139,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:background="@drawable/bg_summary"
+            android:background="?attr/colorSecondaryContainer"
             android:padding="20dp">
 
             <LinearLayout
@@ -152,7 +153,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:text="@string/summary_total"
-                    android:textColor="#DDDDDD"
+                    android:textColor="?attr/colorOnSecondaryContainer"
                     android:textSize="15sp" />
 
                 <TextView
@@ -160,7 +161,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Rp 0"
-                    android:textColor="@color/white"
+                    android:textColor="?attr/colorOnSecondaryContainer"
                     android:textSize="22sp"
                     android:textStyle="bold" />
             </LinearLayout>
