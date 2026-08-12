@@ -7,6 +7,8 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.notacostume.app.databinding.FragmentRiwayatBinding
@@ -17,9 +19,15 @@ class RiwayatFragment : Fragment() {
     private val b get() = _b!!
 
     private val db by lazy { NotaDbHelper(requireContext()) }
-    private val adapter = NotaAdapter { nota ->
-        startActivity(Intent(requireContext(), NotaDetailActivity::class.java).putExtra("id", nota.id))
-    }
+    private val adapter = NotaAdapter(
+        onClick = { nota ->
+            startActivity(Intent(requireContext(), NotaDetailActivity::class.java).putExtra("id", nota.id))
+        },
+        onEdit = { nota ->
+            startActivity(Intent(requireContext(), EditNotaActivity::class.java).putExtra("id", nota.id))
+        },
+        onDelete = { nota -> confirmDelete(nota) }
+    )
 
     private var allNotas: List<Nota> = emptyList()
     private var query: String = ""
@@ -33,6 +41,8 @@ class RiwayatFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         b.rvRiwayat.layoutManager = LinearLayoutManager(requireContext())
         b.rvRiwayat.adapter = adapter
+
+        b.btnExport.setOnClickListener { exportCsv() }
 
         b.etSearch.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
@@ -74,5 +84,27 @@ class RiwayatFragment : Fragment() {
         }
         b.tvEmpty.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
         adapter.submit(list)
+    }
+
+    private fun confirmDelete(nota: Nota) {
+        AlertDialog.Builder(requireContext())
+            .setTitle(nota.nomor)
+            .setMessage(R.string.hapus_konfirmasi)
+            .setPositiveButton(R.string.ya) { _, _ ->
+                db.delete(nota.id)
+                Toast.makeText(requireContext(), R.string.nota_terhapus, Toast.LENGTH_SHORT).show()
+                refresh()
+            }
+            .setNegativeButton(R.string.batal, null)
+            .show()
+    }
+
+    private fun exportCsv() {
+        val name = CsvExporter.export(requireContext(), db.getAll())
+        if (name != null) {
+            Toast.makeText(requireContext(), getString(R.string.export_done, name), Toast.LENGTH_LONG).show()
+        } else {
+            Toast.makeText(requireContext(), R.string.export_empty, Toast.LENGTH_SHORT).show()
+        }
     }
 }

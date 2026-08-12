@@ -4,18 +4,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F1F3F6">
+    android:background="?attr/colorSurface">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
-        android:background="@color/indigo_700"
+        android:background="?attr/colorSurfaceContainer"
         app:menu="@menu/menu_detail"
         app:navigationIcon="@android:drawable/ic_menu_revert"
         app:title="@string/app_name"
-        app:titleTextColor="@color/white"
-        app:subtitleTextColor="#DDDDDD" />
+        app:titleTextColor="?attr/colorOnSurface"
+        app:subtitleTextColor="?attr/colorOnSurfaceVariant" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -42,7 +42,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="12dp"
-        android:background="@color/white">
+        android:background="?attr/colorSurface">
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnShare"

@@ -1,7 +1,9 @@
 package com.notacostume.app
 
 import android.os.Bundle
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
 import com.notacostume.app.databinding.ActivityMainBinding
 
@@ -16,6 +18,13 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         b = ActivityMainBinding.inflate(layoutInflater)
         setContentView(b.root)
+
+        b.toolbar.setOnMenuItemClickListener { item ->
+            if (item.itemId == R.id.menu_theme) {
+                showThemeDialog()
+                true
+            } else false
+        }
 
         if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
@@ -52,5 +61,28 @@ class MainActivity : AppCompatActivity() {
             .show(target)
             .hide(other)
             .commit()
+    }
+
+    private fun showThemeDialog() {
+        val modes = intArrayOf(
+            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+            AppCompatDelegate.MODE_NIGHT_NO,
+            AppCompatDelegate.MODE_NIGHT_YES
+        )
+        val labels = arrayOf(
+            getString(R.string.theme_sistem),
+            getString(R.string.theme_terang),
+            getString(R.string.theme_gelap)
+        )
+        var selected = modes.indexOf(AppCompatDelegate.getDefaultNightMode()).coerceAtLeast(0)
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.theme_title)
+            .setSingleChoiceItems(labels, selected) { _, which -> selected = which }
+            .setPositiveButton("OK") { _, _ ->
+                AppCompatDelegate.setDefaultNightMode(modes[selected])
+            }
+            .setNegativeButton(R.string.batal, null)
+            .show()
     }
 }
