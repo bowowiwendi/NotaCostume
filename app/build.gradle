@@ -3,6 +3,18 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+// Signing release: baca keystore.properties (lokal, tidak di-commit) atau env CI.
+// Jika tidak tersedia, build release memakai debug signing agar tetap bisa dibuild.
+def keystorePropsFile = rootProject.file("keystore.properties")
+def keystoreProps = new Properties()
+def hasKeystore = false
+if (keystorePropsFile.exists()) {
+    keystoreProps.load(new FileInputStream(keystorePropsFile))
+    hasKeystore = keystoreProps["keystoreFile"] != null
+} else if (System.getenv("KEYSTORE_B64") != null) {
+    hasKeystore = true
+}
+
 android {
     namespace 'com.notacostume.app'
     compileSdk 34
@@ -12,13 +24,40 @@ android {
         minSdk 24
         targetSdk 34
         versionCode 1
-        versionName "1.0"
+        versionName "1.0.0"
+    }
+
+    signingConfigs {
+        release {
+            if (keystorePropsFile.exists()) {
+                storeFile file(keystoreProps["keystoreFile"])
+                storePassword keystoreProps["storePassword"]
+                keyAlias keystoreProps["keyAlias"]
+                keyPassword keystoreProps["keyPassword"]
+            } else {
+                // Dari env CI (KEYSTORE_B64 = base64 keystore)
+                def keystoreB64 = System.getenv("KEYSTORE_B64")
+                if (keystoreB64 != null) {
+                    def tmp = new File(buildDir, "release.keystore")
+                    tmp.parentFile.mkdirs()
+                    tmp.bytes = keystoreB64.decodeBase64()
+                    storeFile tmp
+                    storePassword System.getenv("KEYSTORE_PASSWORD")
+                    keyAlias System.getenv("KEY_ALIAS")
+                    keyPassword System.getenv("KEY_PASSWORD")
+                }
+            }
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            // Pakai signing rilis jika keystore ada, kalau tidak pakai debug signing
+            if (hasKeystore) {
+                signingConfig signingConfigs.release
+            }
         }
     }
     compileOptions {

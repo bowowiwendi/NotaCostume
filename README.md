@@ -39,6 +39,33 @@ Jika Android SDK tidak ada di lokasi default, buat file `local.properties`:
 sdk.dir=/path/ke/android-sdk
 ```
 
+## CI / Rilis Otomatis (GitHub Actions)
+
+Repositori ini punya workflow `.github/workflows/build.yml`:
+
+- **Setiap push / PR** → build otomatis APK debug, hasilnya tersedia di tab **Actions** sebagai artifact.
+- **Tag `v1.0.0` dst.** → build otomatis APK release + membuat **GitHub Release** dengan file `app-release.apk` terlampir.
+
+Untuk menandatangani APK rilis, set **repository secrets** di GitHub:
+
+| Secret            | Isi                                        |
+| ----------------- | ------------------------------------------ |
+| `KEYSTORE_B64`    | Isi file keystore dalam format base64      |
+| `KEYSTORE_PASSWORD` | Password keystore                        |
+| `KEY_ALIAS`       | Alias key                                  |
+| `KEY_PASSWORD`    | Password key                               |
+
+Tanpa secret tersebut, build rilis tetap berhasil tapi memakai debug signing (tidak untuk dipublikasikan ke Play Store).
+
+Lokal, signing rilis juga bisa lewat file `keystore.properties` (tidak ikut di-commit):
+
+```properties
+keystoreFile=/path/ke/release.keystore
+storePassword=...
+keyAlias=...
+keyPassword=...
+```
+
 ## Teknologi
 
 - **Kotlin** + ViewBinding
