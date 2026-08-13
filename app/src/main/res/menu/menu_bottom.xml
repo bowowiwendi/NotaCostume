@@ -9,6 +9,10 @@
         android:icon="@drawable/ic_history"
         android:title="@string/menu_riwayat" />
     <item
+        android:id="@+id/menu_kalkulator"
+        android:icon="@drawable/ic_calculator"
+        android:title="@string/menu_kalkulator" />
+    <item
         android:id="@+id/menu_settings"
         android:icon="@android:drawable/ic_menu_preferences"
         android:title="@string/menu_settings" />

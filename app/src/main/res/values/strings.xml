@@ -30,6 +30,7 @@
     <string name="menu_form">Buat Nota</string>
     <string name="menu_riwayat">Riwayat</string>
     <string name="menu_settings">Pengaturan</string>
+    <string name="menu_kalkulator">Kalkulator</string>
     <string name="share_title">Bagikan Nota</string>
     <string name="share_text">Nota pembelian %1$s</string>
 

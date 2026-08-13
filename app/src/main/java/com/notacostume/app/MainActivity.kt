@@ -19,6 +19,9 @@ class MainActivity : AppCompatActivity() {
     private val riwayatFragment: RiwayatFragment
         get() = supportFragmentManager.findFragmentByTag(TAG_RIWAYAT) as RiwayatFragment
 
+    private val kalkulatorFragment: KalkulatorFragment
+        get() = supportFragmentManager.findFragmentByTag(TAG_KALKULATOR) as KalkulatorFragment
+
     override fun onCreate(savedInstanceState: Bundle?) {
         applyThemePreference()
         super.onCreate(savedInstanceState)
@@ -35,10 +38,13 @@ class MainActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             val form = FormFragment()
             val riwayat = RiwayatFragment()
+            val kalkulator = KalkulatorFragment()
             supportFragmentManager.beginTransaction()
                 .add(R.id.fragmentContainer, form, TAG_FORM)
                 .add(R.id.fragmentContainer, riwayat, TAG_RIWAYAT)
+                .add(R.id.fragmentContainer, kalkulator, TAG_KALKULATOR)
                 .hide(riwayat)
+                .hide(kalkulator)
                 .commit()
         }
 
@@ -51,6 +57,10 @@ class MainActivity : AppCompatActivity() {
                 R.id.menu_riwayat -> {
                     riwayatFragment.refresh()
                     showFragment(riwayatFragment)
+                    true
+                }
+                R.id.menu_kalkulator -> {
+                    showFragment(kalkulatorFragment)
                     true
                 }
                 R.id.menu_settings -> {
@@ -68,11 +78,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showFragment(target: Fragment) {
-        val other = if (target === formFragment) riwayatFragment else formFragment
-        supportFragmentManager.beginTransaction()
-            .show(target)
-            .hide(other)
-            .commit()
+        val all = listOf(formFragment, riwayatFragment, kalkulatorFragment)
+        supportFragmentManager.beginTransaction().apply {
+            all.filter { it !== target }.forEach { hide(it) }
+            show(target)
+        }.commit()
     }
 
     private fun applyThemePreference() {
@@ -120,5 +130,6 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private const val TAG_FORM = "form"
         private const val TAG_RIWAYAT = "riwayat"
+        private const val TAG_KALKULATOR = "kalkulator"
     }
 }
