@@ -23,7 +23,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textCapWords"
-            android:maxLines="1" />
+            android:maxLines="1"
+            android:minHeight="0dp"
+            android:textSize="13sp" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -45,6 +47,8 @@
             android:layout_height="wrap_content"
             android:inputType="number"
             android:maxLines="1"
+            android:minHeight="0dp"
+            android:textSize="13sp"
             android:gravity="end" />
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -67,18 +71,20 @@
             android:layout_height="wrap_content"
             android:inputType="numberDecimal"
             android:maxLines="1"
+            android:minHeight="0dp"
+            android:textSize="13sp"
             android:gravity="end" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnHapusItem"
         style="@style/Widget.Material3.Button.IconButton.Filled.Tonal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:layout_marginStart="8dp"
         android:contentDescription="@string/hapus_barang"
         app:icon="@android:drawable/ic_menu_close_clear_cancel"
-        app:iconSize="18dp"
+        app:iconSize="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

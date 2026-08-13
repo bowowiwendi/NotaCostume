@@ -19,7 +19,7 @@
             android:layout_weight="1"
             android:text="@string/riwayat_title"
             android:textColor="?attr/colorOnSurface"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:textStyle="bold" />
 
         <com.google.android.material.button.MaterialButton

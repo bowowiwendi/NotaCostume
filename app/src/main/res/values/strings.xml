@@ -33,7 +33,6 @@
     <string name="share_title">Bagikan Nota</string>
     <string name="share_text">Nota pembelian %1$s</string>
 
-    <string name="export_csv">Export CSV</string>
     <string name="export_done">File CSV tersimpan di folder Downloads: %1$s</string>
     <string name="export_empty">Belum ada nota untuk di-export</string>
 

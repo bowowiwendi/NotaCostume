@@ -35,7 +35,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="?attr/colorPrimary"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <ImageView
@@ -54,7 +54,7 @@
             android:ellipsize="end"
             android:maxLines="2"
             android:textColor="?attr/colorOnSurface"
-            android:textSize="16sp"
+            android:textSize="15sp"
             android:textStyle="bold" />
 
         <TextView
@@ -63,7 +63,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="13sp" />
+            android:textSize="12sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -78,12 +78,12 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:layout_marginEnd="6dp"
-                android:minHeight="40dp"
+                android:minHeight="36dp"
                 android:text="@string/menu_edit"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 app:cornerRadius="10dp"
                 app:icon="@drawable/ic_edit_note"
-                app:iconSize="18dp" />
+                app:iconSize="16dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnHapus"
@@ -91,13 +91,13 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:minHeight="40dp"
+                android:minHeight="36dp"
                 android:text="@string/btn_hapus"
                 android:textColor="?attr/colorError"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 app:cornerRadius="10dp"
                 app:icon="@drawable/ic_delete"
-                app:iconSize="18dp"
+                app:iconSize="16dp"
                 app:iconTint="?attr/colorError" />
         </LinearLayout>
     </LinearLayout>

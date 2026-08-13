@@ -5,6 +5,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import com.notacostume.app.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -15,6 +16,7 @@ class MainActivity : AppCompatActivity() {
     private val riwayatFragment by lazy { RiwayatFragment() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        applyThemePreference()
         super.onCreate(savedInstanceState)
         b = ActivityMainBinding.inflate(layoutInflater)
         setContentView(b.root)
@@ -45,6 +47,10 @@ class MainActivity : AppCompatActivity() {
                     showFragment(riwayatFragment)
                     true
                 }
+                R.id.menu_settings -> {
+                    startActivity(android.content.Intent(this, SettingsActivity::class.java))
+                    true
+                }
                 else -> false
             }
         }
@@ -61,6 +67,16 @@ class MainActivity : AppCompatActivity() {
             .show(target)
             .hide(other)
             .commit()
+    }
+
+    private fun applyThemePreference() {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
+        val mode = when (prefs.getString("theme_preference", "system")) {
+            "light" -> AppCompatDelegate.MODE_NIGHT_NO
+            "dark" -> AppCompatDelegate.MODE_NIGHT_YES
+            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        }
+        AppCompatDelegate.setDefaultNightMode(mode)
     }
 
     private fun showThemeDialog() {
@@ -81,6 +97,15 @@ class MainActivity : AppCompatActivity() {
             .setSingleChoiceItems(labels, selected) { _, which -> selected = which }
             .setPositiveButton("OK") { _, _ ->
                 AppCompatDelegate.setDefaultNightMode(modes[selected])
+                val pref = when (selected) {
+                    1 -> "light"
+                    2 -> "dark"
+                    else -> "system"
+                }
+                PreferenceManager.getDefaultSharedPreferences(this)
+                    .edit()
+                    .putString("theme_preference", pref)
+                    .apply()
             }
             .setNegativeButton(R.string.batal, null)
             .show()
