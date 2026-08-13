@@ -1,5 +1,6 @@
 package com.notacostume.app
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -12,8 +13,11 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var b: ActivityMainBinding
 
-    private val formFragment by lazy { FormFragment() }
-    private val riwayatFragment by lazy { RiwayatFragment() }
+    private val formFragment: FormFragment
+        get() = supportFragmentManager.findFragmentByTag(TAG_FORM) as FormFragment
+
+    private val riwayatFragment: RiwayatFragment
+        get() = supportFragmentManager.findFragmentByTag(TAG_RIWAYAT) as RiwayatFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         applyThemePreference()
@@ -29,10 +33,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (savedInstanceState == null) {
+            val form = FormFragment()
+            val riwayat = RiwayatFragment()
             supportFragmentManager.beginTransaction()
-                .add(R.id.fragmentContainer, formFragment, "form")
-                .add(R.id.fragmentContainer, riwayatFragment, "riwayat")
-                .hide(riwayatFragment)
+                .add(R.id.fragmentContainer, form, TAG_FORM)
+                .add(R.id.fragmentContainer, riwayat, TAG_RIWAYAT)
+                .hide(riwayat)
                 .commit()
         }
 
@@ -48,7 +54,7 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.menu_settings -> {
-                    startActivity(android.content.Intent(this, SettingsActivity::class.java))
+                    startActivity(Intent(this, SettingsActivity::class.java))
                     true
                 }
                 else -> false
@@ -58,7 +64,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        riwayatFragment.refresh()
+        (supportFragmentManager.findFragmentByTag(TAG_RIWAYAT) as? RiwayatFragment)?.refresh()
     }
 
     private fun showFragment(target: Fragment) {
@@ -109,5 +115,10 @@ class MainActivity : AppCompatActivity() {
             }
             .setNegativeButton(R.string.batal, null)
             .show()
+    }
+
+    companion object {
+        private const val TAG_FORM = "form"
+        private const val TAG_RIWAYAT = "riwayat"
     }
 }
