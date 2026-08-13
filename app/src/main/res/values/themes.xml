@@ -15,5 +15,6 @@
         <item name="colorOutline">@color/md_outline</item>
         <item name="dynamicColorThemeOverlay">@style/ThemeOverlay.Material3.DynamicColors.DayNight</item>
         <item name="android:statusBarColor">?attr/colorSurfaceContainer</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 </resources>
