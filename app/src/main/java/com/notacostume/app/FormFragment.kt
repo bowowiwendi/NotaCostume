@@ -1,5 +1,7 @@
 package com.notacostume.app
 
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -8,10 +10,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.Toast
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.notacostume.app.databinding.FragmentFormBinding
 import com.notacostume.app.databinding.ItemBarangBinding
+import java.io.File
+import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -26,12 +33,29 @@ class FormFragment : Fragment() {
 
     private var editId: Long = 0L
     private var existingNomor: String = ""
+    private var fotoPath: String = ""
+    private var ttdPath: String = ""
     var onNotaSaved: (() -> Unit)? = null
 
     companion object {
         const val ARG_NOTA_ID = "notaId"
         fun forEdit(notaId: Long) = FormFragment().apply {
             arguments = Bundle().apply { putLong(ARG_NOTA_ID, notaId) }
+        }
+    }
+
+    private val pickFoto = registerForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) {
+            val dest = File(requireContext().filesDir, "foto_${System.currentTimeMillis()}.jpg")
+            try {
+                requireContext().contentResolver.openInputStream(uri)?.use { input ->
+                    FileOutputStream(dest).use { output -> input.copyTo(output) }
+                }
+                fotoPath = dest.absolutePath
+                showFotoPreview()
+            } catch (_: Exception) {
+                Toast.makeText(requireContext(), R.string.export_failed, Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -42,11 +66,18 @@ class FormFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        b.etTanggal.setText(fmtDate.format(Date()))
         b.etTanggal.setOnClickListener { pickDate { d -> b.etTanggal.setText(d) } }
         b.btnTambahBarang.setOnClickListener { addItemRow(); updateSummary() }
         addItemRow()
         updateSummary()
         b.btnSimpan.setOnClickListener { simpanNota() }
+        b.btnTtd.setOnClickListener { showTtdDialog() }
+        b.btnHapusTtd.setOnClickListener { hapusTtd() }
+        b.btnTambahFoto.setOnClickListener {
+            pickFoto.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        }
+        b.btnHapusFoto.setOnClickListener { hapusFoto() }
 
         editId = arguments?.getLong(ARG_NOTA_ID) ?: 0L
         if (editId > 0) loadNota(editId)
@@ -58,9 +89,14 @@ class FormFragment : Fragment() {
         b.etToko.setText(nota.toko)
         b.etTanggal.setText(nota.tanggal)
         b.etCatatan.setText(nota.catatan)
+        b.etNamaPenjual.setText(nota.namaPenjual)
+        fotoPath = nota.foto
+        ttdPath = nota.ttdPenjual
         b.llItems.removeAllViews()
         if (nota.items.isEmpty()) addItemRow()
         nota.items.forEach { addItemRow(it.nama, it.jumlah, it.harga) }
+        showFotoPreview()
+        showTtdPreview()
         updateSummary()
     }
 
@@ -117,12 +153,82 @@ class FormFragment : Fragment() {
         }
     }
 
+    private fun showFotoPreview() {
+        val f = File(fotoPath)
+        if (fotoPath.isNotBlank() && f.exists()) {
+            b.ivFoto.setImageURI(Uri.fromFile(f))
+            b.fotoContainer.visibility = View.VISIBLE
+        } else {
+            b.fotoContainer.visibility = View.GONE
+        }
+    }
+
+    private fun showTtdPreview() {
+        val f = File(ttdPath)
+        if (ttdPath.isNotBlank() && f.exists()) {
+            b.ivTtd.setImageURI(Uri.fromFile(f))
+            b.ivTtd.visibility = View.VISIBLE
+            b.btnHapusTtd.visibility = View.VISIBLE
+        } else {
+            b.ivTtd.visibility = View.GONE
+            b.btnHapusTtd.visibility = View.GONE
+        }
+    }
+
+    private fun hapusFoto() {
+        File(fotoPath).takeIf { it.exists() }?.delete()
+        fotoPath = ""
+        showFotoPreview()
+    }
+
+    private fun hapusTtd() {
+        AlertDialog.Builder(requireContext())
+            .setMessage(R.string.ttd_hapus_dialog)
+            .setPositiveButton(R.string.btn_hapus) { _, _ ->
+                File(ttdPath).takeIf { it.exists() }?.delete()
+                ttdPath = ""
+                showTtdPreview()
+            }
+            .setNegativeButton(R.string.batal, null)
+            .show()
+    }
+
+    private fun showTtdDialog() {
+        val dv = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_signature, null)
+        val sig = dv.findViewById<SignatureView>(R.id.sigView)
+        AlertDialog.Builder(requireContext())
+            .setView(dv)
+            .setPositiveButton(R.string.btn_simpan) { _, _ ->
+                if (sig.isEmpty()) {
+                    Toast.makeText(requireContext(), R.string.ttd_hint, Toast.LENGTH_SHORT).show()
+                } else {
+                    saveTtd(sig)
+                }
+            }
+            .setNegativeButton(R.string.batal, null)
+            .setNeutralButton(R.string.bersihkan) { _, _ -> sig.clear() }
+            .show()
+    }
+
+    private fun saveTtd(sig: SignatureView) {
+        val bmp = sig.toBitmap()
+        val file = File(requireContext().filesDir, "ttd_${System.currentTimeMillis()}.png")
+        try {
+            FileOutputStream(file).use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+            ttdPath = file.absolutePath
+            showTtdPreview()
+        } catch (_: Exception) {
+            Toast.makeText(requireContext(), R.string.export_failed, Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun simpanNota() {
         val items = readItems()
         if (items.isEmpty()) {
             Toast.makeText(requireContext(), R.string.isi_lengkap, Toast.LENGTH_SHORT).show()
             return
         }
+        val namaPenjual = b.etNamaPenjual.text.toString().trim()
         if (editId > 0) {
             val nota = Nota(
                 id = editId,
@@ -131,6 +237,9 @@ class FormFragment : Fragment() {
                 tanggal = b.etTanggal.text.toString().ifBlank { fmtDate.format(Date()) },
                 catatan = b.etCatatan.text.toString().trim(),
                 dibuatPada = System.currentTimeMillis(),
+                namaPenjual = namaPenjual,
+                ttdPenjual = ttdPath,
+                foto = fotoPath,
                 items = items
             )
             db.update(nota)
@@ -144,6 +253,9 @@ class FormFragment : Fragment() {
             tanggal = b.etTanggal.text.toString().ifBlank { fmtDate.format(Date()) },
             catatan = b.etCatatan.text.toString().trim(),
             dibuatPada = System.currentTimeMillis(),
+            namaPenjual = namaPenjual,
+            ttdPenjual = ttdPath,
+            foto = fotoPath,
             items = items
         )
         db.insert(nota)
@@ -153,9 +265,14 @@ class FormFragment : Fragment() {
     }
 
     private fun clearForm() {
-        for (v in intArrayOf(R.id.etToko, R.id.etTanggal, R.id.etCatatan)) {
+        for (v in intArrayOf(R.id.etToko, R.id.etTanggal, R.id.etCatatan, R.id.etNamaPenjual)) {
             b.root.findViewById<View>(v).let { if (it is EditText) it.text = null }
         }
+        b.etTanggal.setText(fmtDate.format(Date()))
+        hapusFoto()
+        File(ttdPath).takeIf { it.exists() }?.delete()
+        ttdPath = ""
+        showTtdPreview()
         b.llItems.removeAllViews()
         addItemRow()
         updateSummary()

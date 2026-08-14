@@ -15,6 +15,9 @@ data class Nota(
     val tanggal: String = "",
     val catatan: String = "",
     val dibuatPada: Long = System.currentTimeMillis(),
+    val namaPenjual: String = "",
+    val ttdPenjual: String = "",
+    val foto: String = "",
     val items: List<NotaItem> = emptyList()
 ) {
     val total: Long get() = items.sumOf { it.total }

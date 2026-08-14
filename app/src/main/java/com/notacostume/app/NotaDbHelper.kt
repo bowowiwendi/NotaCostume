@@ -13,9 +13,14 @@ class NotaDbHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, 
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_ITEM")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE")
-        onCreate(db)
+        if (oldVersion < 4) {
+            for (col in arrayOf("nama_penjual TEXT", "ttd_penjual TEXT", "foto TEXT")) {
+                try {
+                    db.execSQL("ALTER TABLE $TABLE ADD COLUMN $col")
+                } catch (_: Exception) {
+                }
+            }
+        }
     }
 
     private fun createTables(db: SQLiteDatabase) {
@@ -26,7 +31,10 @@ class NotaDbHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, 
                 toko TEXT,
                 tanggal TEXT,
                 catatan TEXT,
-                dibuat_pada INTEGER
+                dibuat_pada INTEGER,
+                nama_penjual TEXT,
+                ttd_penjual TEXT,
+                foto TEXT
             )"""
         )
         db.execSQL(
@@ -135,6 +143,9 @@ class NotaDbHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, 
         put("tanggal", tanggal)
         put("catatan", catatan)
         put("dibuat_pada", dibuatPada)
+        put("nama_penjual", namaPenjual)
+        put("ttd_penjual", ttdPenjual)
+        put("foto", foto)
     }
 
     private fun NotaItem.toValues(notaId: Long) = ContentValues().apply {
@@ -150,12 +161,15 @@ class NotaDbHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, 
         toko = getString(getColumnIndexOrThrow("toko")) ?: "",
         tanggal = getString(getColumnIndexOrThrow("tanggal")) ?: "",
         catatan = getString(getColumnIndexOrThrow("catatan")) ?: "",
-        dibuatPada = getLong(getColumnIndexOrThrow("dibuat_pada"))
+        dibuatPada = getLong(getColumnIndexOrThrow("dibuat_pada")),
+        namaPenjual = getString(getColumnIndexOrThrow("nama_penjual")) ?: "",
+        ttdPenjual = getString(getColumnIndexOrThrow("ttd_penjual")) ?: "",
+        foto = getString(getColumnIndexOrThrow("foto")) ?: ""
     )
 
     companion object {
         private const val DB_NAME = "nota.db"
-        private const val DB_VERSION = 3
+        private const val DB_VERSION = 4
         private const val TABLE = "nota"
         private const val TABLE_ITEM = "nota_item"
     }

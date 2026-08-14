@@ -11,7 +11,7 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorSurfaceContainer"
-        app:navigationIcon="@android:drawable/ic_menu_revert"
+        app:navigationIcon="@drawable/ic_back"
         app:title="@string/menu_settings"
         app:titleTextColor="?attr/colorOnSurface"
         app:subtitleTextColor="?attr/colorOnSurfaceVariant" />

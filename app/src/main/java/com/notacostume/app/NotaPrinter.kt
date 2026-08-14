@@ -3,6 +3,7 @@ package com.notacostume.app
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -203,11 +204,47 @@ object NotaPrinter {
             y += 12f
         }
 
+        if (nota.foto.isNotBlank() && y < PAGE_HEIGHT - 190f) {
+            val photo = BitmapFactory.decodeFile(nota.foto)
+            if (photo != null) {
+                p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+                p.textSize = 11f
+                p.textAlign = Paint.Align.LEFT
+                canvas.drawText("Bukti Foto:", 24f, y, p)
+                y += 6f
+                val maxW = PAGE_WIDTH - 48f
+                val maxH = 90f
+                val sc = minOf(maxW / photo.width.toFloat(), maxH / photo.height.toFloat())
+                val dw = photo.width * sc
+                val dh = photo.height * sc
+                canvas.drawBitmap(
+                    photo, null,
+                    android.graphics.RectF(24f, y, 24f + dw, y + dh),
+                    null
+                )
+                y += dh + 10f
+            }
+        }
+
         val bottom = PAGE_HEIGHT - 42f
+        if (nota.ttdPenjual.isNotBlank()) {
+            val sig = BitmapFactory.decodeFile(nota.ttdPenjual)
+            if (sig != null) {
+                val sc = minOf(100f / sig.width, 36f / sig.height)
+                val dw = sig.width * sc
+                val dh = sig.height * sc
+                canvas.drawBitmap(
+                    sig, null,
+                    android.graphics.RectF(PAGE_WIDTH - 24f - dw, bottom - 62f, PAGE_WIDTH - 24f, bottom - 62f + dh),
+                    null
+                )
+            }
+        }
+        val penjualLabel = nota.namaPenjual.ifBlank { "Penjual" }
         p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
         p.textSize = 10f
         p.textAlign = Paint.Align.RIGHT
-        canvas.drawText("Penjual", PAGE_WIDTH - 24f, bottom - 30f, p)
+        canvas.drawText(penjualLabel, PAGE_WIDTH - 24f, bottom - 30f, p)
         p.strokeWidth = 1f
         canvas.drawLine(PAGE_WIDTH - 120f, bottom, PAGE_WIDTH - 24f, bottom, p)
 
