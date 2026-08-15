@@ -64,9 +64,4 @@ class SettingsActivity : AppCompatActivity() {
             finish()
         }
     }
-
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        delegate.applyDayNight()
-    }
 }

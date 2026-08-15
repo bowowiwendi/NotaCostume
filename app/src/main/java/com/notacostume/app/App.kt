@@ -33,7 +33,7 @@ class App : Application() {
     }
 
     private fun applyTheme() {
-        val prefs = getSharedPreferences("com.notacostume.app_preferences", MODE_PRIVATE)
+        val prefs = androidx.preference.PreferenceManager.getDefaultSharedPreferences(this)
         val mode = prefs.getString("theme_preference", "system")
         val nightMode = when (mode) {
             "light" -> AppCompatDelegate.MODE_NIGHT_NO
