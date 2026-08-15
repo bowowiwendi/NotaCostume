@@ -37,12 +37,12 @@ class TokoAdapter(
             b.tvTeleponToko.text = if (toko.telepon.isNotBlank()) toko.telepon else "-"
             
             if (toko.isActive) {
-                b.tvStatusToko.text = R.string.toko_aktif
+                b.tvStatusToko.text = b.root.context.getString(R.string.toko_aktif)
                 b.tvStatusToko.setTextColor(b.root.context.getColor(com.google.android.material.R.color.design_default_color_primary))
                 b.tvStatusToko.background = b.root.context.getDrawable(R.drawable.bg_chip)
             } else {
-                b.tvStatusToko.text = R.string.toko_tidak_aktif
-                b.tvStatusToko.setTextColor(b.root.context.getColor(com.google.android.material.R.color.design_default_color_on_surface_variant))
+                b.tvStatusToko.text = b.root.context.getString(R.string.toko_tidak_aktif)
+                b.tvStatusToko.setTextColor(b.root.context.getColor(com.google.android.material.R.color.design_default_color_primary_dark))
                 b.tvStatusToko.background = b.root.context.getDrawable(R.drawable.bg_chip)
             }
 

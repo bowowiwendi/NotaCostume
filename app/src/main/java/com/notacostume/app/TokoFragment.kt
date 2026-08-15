@@ -60,9 +60,9 @@ class TokoFragment : Fragment() {
         val etTelepon = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etTeleponToko)
 
         if (isEdit) {
-            etNama.setText(toko.nama)
-            etAlamat.setText(toko.alamat)
-            etTelepon.setText(toko.telepon)
+            etNama.setText(toko!!.nama)
+            etAlamat.setText(toko!!.alamat)
+            etTelepon.setText(toko!!.telepon)
         }
 
         MaterialAlertDialogBuilder(requireContext())
@@ -75,11 +75,11 @@ class TokoFragment : Fragment() {
                     return@setPositiveButton
                 }
                 val newToko = Toko(
-                    id = if (isEdit) toko.id else 0L,
+                    id = if (isEdit) toko!!.id else 0L,
                     nama = nama,
                     alamat = etAlamat.text.toString().trim(),
                     telepon = etTelepon.text.toString().trim(),
-                    isActive = if (isEdit) toko.isActive else false
+                    isActive = if (isEdit) toko!!.isActive else false
                 )
                 if (isEdit) TokoManager.update(requireContext(), newToko)
                 else TokoManager.add(requireContext(), newToko)

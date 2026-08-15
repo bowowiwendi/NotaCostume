@@ -35,9 +35,6 @@ class MainActivity : AppCompatActivity() {
             if (item.itemId == R.id.menu_theme) {
                 showThemeDialog()
                 true
-            } else if (item.itemId == R.id.menu_settings) {
-                startActivity(Intent(this, SettingsActivity::class.java))
-                true
             } else false
         }
 
@@ -61,7 +58,7 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.menu_form -> { showFragment(formFragment); true }
                 R.id.menu_riwayat -> { riwayatFragment.refresh(); showFragment(riwayatFragment); true }
-                R.id.menu_calc -> { showFragment(kalkulatorFragment); true }
+                R.id.menu_kalkulator -> { showFragment(kalkulatorFragment); true }
                 R.id.menu_toko -> { tokoFragment.refresh(); showFragment(tokoFragment); true }
                 else -> false
             }
