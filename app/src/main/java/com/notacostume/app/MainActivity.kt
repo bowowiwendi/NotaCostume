@@ -32,10 +32,14 @@ class MainActivity : AppCompatActivity() {
         setContentView(b.root)
 
         b.toolbar.setOnMenuItemClickListener { item ->
-            if (item.itemId == R.id.menu_theme) {
-                showThemeDialog()
-                true
-            } else false
+            when (item.itemId) {
+                R.id.menu_theme -> { showThemeDialog(); true }
+                R.id.menu_settings -> {
+                    startActivity(Intent(this, SettingsActivity::class.java))
+                    true
+                }
+                else -> false
+            }
         }
 
         if (savedInstanceState == null) {
@@ -111,6 +115,15 @@ class MainActivity : AppCompatActivity() {
             .setSingleChoiceItems(labels, selected) { _, which -> selected = which }
             .setPositiveButton("OK") { _, _ ->
                 AppCompatDelegate.setDefaultNightMode(modes[selected])
+                val pref = when (selected) {
+                    1 -> "light"
+                    2 -> "dark"
+                    else -> "system"
+                }
+                PreferenceManager.getDefaultSharedPreferences(this)
+                    .edit()
+                    .putString("theme_preference", pref)
+                    .apply()
             }
             .setNegativeButton(R.string.batal, null)
             .show()
