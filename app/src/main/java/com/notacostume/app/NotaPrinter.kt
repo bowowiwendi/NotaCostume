@@ -250,8 +250,20 @@ object NotaPrinter {
         p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
         p.textSize = 10f
         p.textAlign = Paint.Align.RIGHT
-        // Label nama persis di bawah garis tanda tangan
-        canvas.drawText(penjualLabel, sigRight, bottom + 14f, p)
+        // Label "Penjual" di ATAS garis tanda tangan (tepat di bawah gambar ttd)
+        if (nota.ttdPenjual.isNotBlank()) {
+            val sig = BitmapFactory.decodeFile(nota.ttdPenjual)
+            if (sig != null) {
+                val targetH = 36f
+                val sc = minOf(targetH / sig.height.toFloat(), (sigRight - sigLeft) / sig.width.toFloat())
+                val dhActual = sig.height * sc
+                canvas.drawText(penjualLabel, sigRight, bottom - dhActual - 4f, p)
+            } else {
+                canvas.drawText(penjualLabel, sigRight, bottom - 4f, p)
+            }
+        } else {
+            canvas.drawText(penjualLabel, sigRight, bottom - 4f, p)
+        }
         p.strokeWidth = 1f
         canvas.drawLine(sigLeft, bottom, sigRight, bottom, p)
 

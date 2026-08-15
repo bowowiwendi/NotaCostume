@@ -13,12 +13,12 @@ class NotaDbHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, 
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        if (oldVersion < 4) {
-            for (col in arrayOf("nama_penjual TEXT", "ttd_penjual TEXT", "foto TEXT")) {
-                try {
-                    db.execSQL("ALTER TABLE $TABLE ADD COLUMN $col")
-                } catch (_: Exception) {
-                }
+        // Pastikan kolom selalu ada walau DB lama (tanpa guard versi)
+        for (col in arrayOf("nama_penjual TEXT", "ttd_penjual TEXT", "foto TEXT")) {
+            try {
+                db.execSQL("ALTER TABLE $TABLE ADD COLUMN $col")
+            } catch (_: Exception) {
+                // kolom sudah ada -> abaikan
             }
         }
     }
@@ -169,7 +169,7 @@ class NotaDbHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, 
 
     companion object {
         private const val DB_NAME = "nota.db"
-        private const val DB_VERSION = 4
+        private const val DB_VERSION = 5
         private const val TABLE = "nota"
         private const val TABLE_ITEM = "nota_item"
     }
