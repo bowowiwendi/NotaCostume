@@ -5,6 +5,7 @@ data class Toko(
     val nama: String = "",
     val alamat: String = "",
     val telepon: String = "",
+    val namaPenjual: String = "",
     val isActive: Boolean = false
 ) {
     companion object {

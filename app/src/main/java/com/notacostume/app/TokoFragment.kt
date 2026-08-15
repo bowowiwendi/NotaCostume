@@ -58,11 +58,13 @@ class TokoFragment : Fragment() {
         val etNama = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etNamaToko)
         val etAlamat = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etAlamatToko)
         val etTelepon = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etTeleponToko)
+        val etNamaPenjual = view.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etNamaPenjualToko)
 
         if (isEdit) {
             etNama.setText(toko!!.nama)
             etAlamat.setText(toko!!.alamat)
             etTelepon.setText(toko!!.telepon)
+            etNamaPenjual.setText(toko!!.namaPenjual)
         }
 
         MaterialAlertDialogBuilder(requireContext())
@@ -79,6 +81,7 @@ class TokoFragment : Fragment() {
                     nama = nama,
                     alamat = etAlamat.text.toString().trim(),
                     telepon = etTelepon.text.toString().trim(),
+                    namaPenjual = etNamaPenjual.text.toString().trim(),
                     isActive = if (isEdit) toko!!.isActive else false
                 )
                 if (isEdit) TokoManager.update(requireContext(), newToko)

@@ -82,6 +82,7 @@
     <string name="label_nama_toko">Nama Toko</string>
     <string name="label_alamat_toko">Alamat</string>
     <string name="label_telepon_toko">Telepon</string>
+    <string name="label_nama_penjual_toko">Nama Penjual (opsional)</string>
     <string name="toko_aktif">Aktif</string>
     <string name="toko_tidak_aktif">Tidak Aktif</string>
     <string name="hapus_toko_konfirmasi">Hapus toko ini? Nota yang sudah ada tidak terhapus.</string>

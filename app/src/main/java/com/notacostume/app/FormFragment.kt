@@ -81,7 +81,8 @@ class FormFragment : Fragment() {
         b.btnHapusFoto.setOnClickListener { hapusFoto() }
 
         // Dropdown nama toko (prediksi + ketik manual)
-        val tokoNames = TokoManager.getAll(requireContext()).map { it.nama }.distinct()
+        val tokoList = TokoManager.getAll(requireContext())
+        val tokoNames = tokoList.map { it.nama }.distinct()
         val tokoAdapter = android.widget.ArrayAdapter(
             requireContext(),
             android.R.layout.simple_dropdown_item_1line,
@@ -89,6 +90,14 @@ class FormFragment : Fragment() {
         )
         b.etToko.setAdapter(tokoAdapter)
         b.etToko.threshold = 1
+        // Saat memilih toko dari dropdown, isi nama penjual otomatis dari data toko
+        b.etToko.setOnItemClickListener { _, _, position, _ ->
+            val chosen = tokoAdapter.getItem(position) ?: return@setOnItemClickListener
+            val toko = tokoList.firstOrNull { it.nama == chosen }
+            if (toko != null && toko.namaPenjual.isNotBlank()) {
+                b.etNamaPenjual.setText(toko.namaPenjual)
+            }
+        }
 
         editId = arguments?.getLong(ARG_NOTA_ID) ?: 0L
         if (editId > 0) loadNota(editId)
