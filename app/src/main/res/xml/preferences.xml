@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory android:title="@string/settings_title">
+    <PreferenceCategory android:title="@string/pengaturan_tampilan">
         <ListPreference
             android:key="theme_preference"
             android:title="@string/pref_theme"
@@ -9,5 +9,18 @@
             android:entryValues="@array/theme_values"
             android:defaultValue="system"
             android:icon="@android:drawable/ic_menu_preferences" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pengaturan_backup">
+        <Preference
+            android:key="backup_drive"
+            android:title="@string/backup_ke_drive"
+            android:summary="@string/backup_ke_drive_summary"
+            android:icon="@drawable/ic_store" />
+        <Preference
+            android:key="restore_drive"
+            android:title="@string/restore_dari_drive"
+            android:summary="@string/restore_dari_drive_summary"
+            android:icon="@android:drawable/ic_menu_revert" />
     </PreferenceCategory>
 </PreferenceScreen>

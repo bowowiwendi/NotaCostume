@@ -84,7 +84,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun applyThemePreference() {
         val mode = PreferenceManager.getDefaultSharedPreferences(this)
-            .getString("preferenceTheme", "system")
+            .getString("theme_preference", "system")
         val nightMode = when (mode) {
             "light" -> AppCompatDelegate.MODE_NIGHT_NO
             "dark" -> AppCompatDelegate.MODE_NIGHT_YES

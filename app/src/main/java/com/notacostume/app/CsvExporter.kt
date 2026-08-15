@@ -17,7 +17,7 @@ object CsvExporter {
     fun export(context: Context, notas: List<Nota>): String? {
         if (notas.isEmpty()) return null
 
-        val csv = buildCsv(notas)
+        val csv = buildCsvString(notas)
         val bytes = "\uFEFF$csv".toByteArray(Charsets.UTF_8) // BOM agar terbaca Excel
         val timestamp = SimpleDateFormat("yyyyMMdd-HHmm", Locale.getDefault()).format(Date())
         val filename = "NotaCostume-riwayat-$timestamp.csv"
@@ -45,7 +45,7 @@ object CsvExporter {
         }
     }
 
-    private fun buildCsv(notas: List<Nota>): String {
+    fun buildCsvString(notas: List<Nota>): String {
         val sb = StringBuilder()
         sb.append(
             csvLine(

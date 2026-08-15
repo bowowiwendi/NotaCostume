@@ -1,11 +1,33 @@
 package com.notacostume.app
 
 import android.os.Bundle
+import android.content.Intent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.ListPreference
+import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 
 class SettingsActivity : AppCompatActivity() {
+
+    private val pickBackupDir = registerForActivityResult(
+        ActivityResultContracts.OpenDocumentTree()
+    ) { uri ->
+        if (uri != null) {
+            contentResolver.takePersistableUriPermission(
+                uri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            )
+            BackupManager.backupDb(this, uri)
+            BackupManager.backupCsv(this, uri, NotaDbHelper(this).getAll())
+        }
+    }
+
+    private val pickRestoreFile = registerForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) BackupManager.restoreDb(this, uri)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -19,9 +41,10 @@ class SettingsActivity : AppCompatActivity() {
             .commit()
     }
 
-    class SettingsFragment : PreferenceFragmentCompat() {
+    inner class SettingsFragment : PreferenceFragmentCompat() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
-            setPreferencesFromResource(R.xml.preferences, rootKey)
+            setPreferencesFromResource(com.notacostume.app.R.xml.preferences, rootKey)
+
             findPreference<ListPreference>("theme_preference")?.setOnPreferenceChangeListener { _, newValue ->
                 val mode = when (newValue) {
                     "light" -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
@@ -29,6 +52,16 @@ class SettingsActivity : AppCompatActivity() {
                     else -> androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 }
                 androidx.appcompat.app.AppCompatDelegate.setDefaultNightMode(mode)
+                true
+            }
+
+            findPreference<Preference>("backup_drive")?.setOnPreferenceClickListener {
+                pickBackupDir.launch(null)
+                true
+            }
+
+            findPreference<Preference>("restore_drive")?.setOnPreferenceClickListener {
+                pickRestoreFile.launch(arrayOf("application/octet-stream", "*/*"))
                 true
             }
         }

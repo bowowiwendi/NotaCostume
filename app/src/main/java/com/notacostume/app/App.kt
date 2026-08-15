@@ -1,6 +1,8 @@
 package com.notacostume.app
 
 import android.app.Application
+import android.content.SharedPreferences
+import androidx.appcompat.app.AppCompatDelegate
 import java.io.File
 import java.io.FileWriter
 import java.io.PrintWriter
@@ -12,6 +14,7 @@ class App : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        applyTheme()
         val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
             try {
@@ -27,5 +30,16 @@ class App : Application() {
             }
             defaultHandler?.uncaughtException(thread, throwable)
         }
+    }
+
+    private fun applyTheme() {
+        val prefs = getSharedPreferences("com.notacostume.app_preferences", MODE_PRIVATE)
+        val mode = prefs.getString("theme_preference", "system")
+        val nightMode = when (mode) {
+            "light" -> AppCompatDelegate.MODE_NIGHT_NO
+            "dark" -> AppCompatDelegate.MODE_NIGHT_YES
+            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        }
+        AppCompatDelegate.setDefaultNightMode(nightMode)
     }
 }

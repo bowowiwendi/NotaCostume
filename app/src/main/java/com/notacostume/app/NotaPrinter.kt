@@ -227,15 +227,21 @@ object NotaPrinter {
         }
 
         val bottom = PAGE_HEIGHT - 42f
+        val sigRight = PAGE_WIDTH - 24f
+        val sigLeft = PAGE_WIDTH - 120f
         if (nota.ttdPenjual.isNotBlank()) {
             val sig = BitmapFactory.decodeFile(nota.ttdPenjual)
             if (sig != null) {
-                val sc = minOf(100f / sig.width, 36f / sig.height)
+                // Skala agar tinggi ttd ~36f, lebar proporsional, tapi tidak melebihi area garis
+                val targetH = 36f
+                val sc = minOf(targetH / sig.height.toFloat(), (sigRight - sigLeft) / sig.width.toFloat())
                 val dw = sig.width * sc
                 val dh = sig.height * sc
+                // Letakkan ttd agar bagian bawahnya menempel ke garis (bottom)
+                val sigTop = bottom - dh
                 canvas.drawBitmap(
                     sig, null,
-                    android.graphics.RectF(PAGE_WIDTH - 24f - dw, bottom - 62f, PAGE_WIDTH - 24f, bottom - 62f + dh),
+                    android.graphics.RectF(sigRight - dw, sigTop, sigRight, bottom),
                     null
                 )
             }
@@ -244,9 +250,10 @@ object NotaPrinter {
         p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
         p.textSize = 10f
         p.textAlign = Paint.Align.RIGHT
-        canvas.drawText(penjualLabel, PAGE_WIDTH - 24f, bottom - 30f, p)
+        // Label nama persis di bawah garis tanda tangan
+        canvas.drawText(penjualLabel, sigRight, bottom + 14f, p)
         p.strokeWidth = 1f
-        canvas.drawLine(PAGE_WIDTH - 120f, bottom, PAGE_WIDTH - 24f, bottom, p)
+        canvas.drawLine(sigLeft, bottom, sigRight, bottom, p)
 
         canvas.restore()
     }
