@@ -1,6 +1,7 @@
 package com.notacostume.app
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -71,6 +72,13 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         riwayatFragment.refresh()
         tokoFragment.refresh()
+    }
+
+    // Dengan configChanges="uiMode", sistem tidak recreate activity saat tema berubah.
+    // AppCompat menerapkan tema in-place -> tanpa kedip.
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        delegate.applyDayNight()
     }
 
     private fun showFragment(target: Fragment) {

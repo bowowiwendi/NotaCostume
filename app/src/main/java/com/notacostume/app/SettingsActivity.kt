@@ -1,6 +1,7 @@
 package com.notacostume.app
 
 import android.os.Bundle
+import android.content.res.Configuration
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -48,10 +49,8 @@ class SettingsActivity : AppCompatActivity() {
                     else -> "system" to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 }
                 prefs.edit { putString("theme_preference", pref) }
-                // Apply di luar onCreate agar tidak recreate saat view belum stabil
-                window.decorView.post {
-                    AppCompatDelegate.setDefaultNightMode(mode)
-                }
+                // configChanges="uiMode" cegah recreate -> apply in-place tanpa kedip
+                AppCompatDelegate.setDefaultNightMode(mode)
             }
             isInitializing = false
 
@@ -66,5 +65,10 @@ class SettingsActivity : AppCompatActivity() {
             Toast.makeText(this, "Settings error: ${e.message}", Toast.LENGTH_LONG).show()
             finish()
         }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        delegate.applyDayNight()
     }
 }
