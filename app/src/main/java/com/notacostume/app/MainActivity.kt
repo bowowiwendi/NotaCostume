@@ -22,6 +22,9 @@ class MainActivity : AppCompatActivity() {
     private val kalkulatorFragment: KalkulatorFragment
         get() = supportFragmentManager.findFragmentByTag(TAG_KALKULATOR) as KalkulatorFragment
 
+    private val tokoFragment: TokoFragment
+        get() = supportFragmentManager.findFragmentByTag(TAG_TOKO) as TokoFragment
+
     override fun onCreate(savedInstanceState: Bundle?) {
         applyThemePreference()
         super.onCreate(savedInstanceState)
@@ -32,6 +35,9 @@ class MainActivity : AppCompatActivity() {
             if (item.itemId == R.id.menu_theme) {
                 showThemeDialog()
                 true
+            } else if (item.itemId == R.id.menu_settings) {
+                startActivity(Intent(this, SettingsActivity::class.java))
+                true
             } else false
         }
 
@@ -39,34 +45,24 @@ class MainActivity : AppCompatActivity() {
             val form = FormFragment()
             val riwayat = RiwayatFragment()
             val kalkulator = KalkulatorFragment()
+            val toko = TokoFragment()
             supportFragmentManager.beginTransaction()
                 .add(R.id.fragmentContainer, form, TAG_FORM)
                 .add(R.id.fragmentContainer, riwayat, TAG_RIWAYAT)
                 .add(R.id.fragmentContainer, kalkulator, TAG_KALKULATOR)
+                .add(R.id.fragmentContainer, toko, TAG_TOKO)
                 .hide(riwayat)
                 .hide(kalkulator)
+                .hide(toko)
                 .commit()
         }
 
         b.bottomNav.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.menu_form -> {
-                    showFragment(formFragment)
-                    true
-                }
-                R.id.menu_riwayat -> {
-                    riwayatFragment.refresh()
-                    showFragment(riwayatFragment)
-                    true
-                }
-                R.id.menu_kalkulator -> {
-                    showFragment(kalkulatorFragment)
-                    true
-                }
-                R.id.menu_settings -> {
-                    startActivity(Intent(this, SettingsActivity::class.java))
-                    true
-                }
+                R.id.menu_form -> { showFragment(formFragment); true }
+                R.id.menu_riwayat -> { riwayatFragment.refresh(); showFragment(riwayatFragment); true }
+                R.id.menu_calc -> { showFragment(kalkulatorFragment); true }
+                R.id.menu_toko -> { tokoFragment.refresh(); showFragment(tokoFragment); true }
                 else -> false
             }
         }
@@ -74,25 +70,30 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        (supportFragmentManager.findFragmentByTag(TAG_RIWAYAT) as? RiwayatFragment)?.refresh()
+        riwayatFragment.refresh()
+        tokoFragment.refresh()
     }
 
     private fun showFragment(target: Fragment) {
-        val all = listOf(formFragment, riwayatFragment, kalkulatorFragment)
-        supportFragmentManager.beginTransaction().apply {
-            all.filter { it !== target }.forEach { hide(it) }
-            show(target)
-        }.commit()
+        val fragments = listOf(formFragment, riwayatFragment, kalkulatorFragment, tokoFragment)
+        val others = fragments.filter { it != target }
+        supportFragmentManager.beginTransaction()
+            .show(target)
+            .hide(others[0])
+            .hide(others[1])
+            .hide(others[2])
+            .commit()
     }
 
     private fun applyThemePreference() {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(this)
-        val mode = when (prefs.getString("theme_preference", "system")) {
+        val mode = PreferenceManager.getDefaultSharedPreferences(this)
+            .getString("preferenceTheme", "system")
+        val nightMode = when (mode) {
             "light" -> AppCompatDelegate.MODE_NIGHT_NO
             "dark" -> AppCompatDelegate.MODE_NIGHT_YES
             else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         }
-        AppCompatDelegate.setDefaultNightMode(mode)
+        AppCompatDelegate.setDefaultNightMode(nightMode)
     }
 
     private fun showThemeDialog() {
@@ -113,23 +114,15 @@ class MainActivity : AppCompatActivity() {
             .setSingleChoiceItems(labels, selected) { _, which -> selected = which }
             .setPositiveButton("OK") { _, _ ->
                 AppCompatDelegate.setDefaultNightMode(modes[selected])
-                val pref = when (selected) {
-                    1 -> "light"
-                    2 -> "dark"
-                    else -> "system"
-                }
-                PreferenceManager.getDefaultSharedPreferences(this)
-                    .edit()
-                    .putString("theme_preference", pref)
-                    .apply()
             }
             .setNegativeButton(R.string.batal, null)
             .show()
     }
 
     companion object {
-        private const val TAG_FORM = "form"
-        private const val TAG_RIWAYAT = "riwayat"
-        private const val TAG_KALKULATOR = "kalkulator"
+        const val TAG_FORM = "form"
+        const val TAG_RIWAYAT = "riwayat"
+        const val TAG_KALKULATOR = "kalkulator"
+        const val TAG_TOKO = "toko"
     }
 }

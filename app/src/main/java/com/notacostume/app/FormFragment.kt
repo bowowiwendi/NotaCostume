@@ -8,7 +8,6 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -66,7 +65,12 @@ class FormFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+<<<<<<< HEAD
         b.etTanggal.setText(fmtDate.format(Date()))
+=======
+        TokoManager.ensureDefault(requireContext())
+
+>>>>>>> eb2dc7f (WIP: multi-toko feature)
         b.etTanggal.setOnClickListener { pickDate { d -> b.etTanggal.setText(d) } }
         b.btnTambahBarang.setOnClickListener { addItemRow(); updateSummary() }
         addItemRow()
@@ -131,12 +135,12 @@ class FormFragment : Fragment() {
     private fun readItems(): List<NotaItem> =
         (0 until b.llItems.childCount).mapNotNull { i ->
             val row = b.llItems.getChildAt(i) as View
-            val nama = row.findViewById<EditText>(R.id.etBarang).text.toString().trim()
+            val nama = row.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etBarang).text.toString().trim()
             if (nama.isEmpty()) return@mapNotNull null
             NotaItem(
                 nama = nama,
-                jumlah = Rupiah.parse(row.findViewById<EditText>(R.id.etJumlah).text.toString()).toInt().coerceAtLeast(1),
-                harga = Rupiah.parse(row.findViewById<EditText>(R.id.etHarga).text.toString())
+                jumlah = Rupiah.parse(row.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etJumlah).text.toString()).toInt().coerceAtLeast(1),
+                harga = Rupiah.parse(row.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etHarga).text.toString())
             )
         }
 
@@ -228,12 +232,18 @@ class FormFragment : Fragment() {
             Toast.makeText(requireContext(), R.string.isi_lengkap, Toast.LENGTH_SHORT).show()
             return
         }
+<<<<<<< HEAD
         val namaPenjual = b.etNamaPenjual.text.toString().trim()
+=======
+        
+        val activeToko = TokoManager.getActive(requireContext())
+        
+>>>>>>> eb2dc7f (WIP: multi-toko feature)
         if (editId > 0) {
             val nota = Nota(
                 id = editId,
                 nomor = existingNomor,
-                toko = b.etToko.text.toString().trim(),
+                toko = activeToko.nama,
                 tanggal = b.etTanggal.text.toString().ifBlank { fmtDate.format(Date()) },
                 catatan = b.etCatatan.text.toString().trim(),
                 dibuatPada = System.currentTimeMillis(),
@@ -249,7 +259,7 @@ class FormFragment : Fragment() {
         }
         val nota = Nota(
             nomor = db.nextNomor(),
-            toko = b.etToko.text.toString().trim(),
+            toko = activeToko.nama,
             tanggal = b.etTanggal.text.toString().ifBlank { fmtDate.format(Date()) },
             catatan = b.etCatatan.text.toString().trim(),
             dibuatPada = System.currentTimeMillis(),
@@ -265,8 +275,13 @@ class FormFragment : Fragment() {
     }
 
     private fun clearForm() {
+<<<<<<< HEAD
         for (v in intArrayOf(R.id.etToko, R.id.etTanggal, R.id.etCatatan, R.id.etNamaPenjual)) {
             b.root.findViewById<View>(v).let { if (it is EditText) it.text = null }
+=======
+        for (v in intArrayOf(R.id.etToko, R.id.etTanggal, R.id.etCatatan)) {
+            b.root.findViewById<View>(v).let { if (it is android.widget.EditText) it.text = null }
+>>>>>>> eb2dc7f (WIP: multi-toko feature)
         }
         b.etTanggal.setText(fmtDate.format(Date()))
         hapusFoto()

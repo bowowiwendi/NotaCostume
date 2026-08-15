@@ -13,7 +13,7 @@
         android:icon="@drawable/ic_calculator"
         android:title="@string/menu_kalkulator" />
     <item
-        android:id="@+id/menu_settings"
-        android:icon="@drawable/ic_settings"
-        android:title="@string/menu_settings" />
+        android:id="@+id/menu_toko"
+        android:icon="@drawable/ic_store"
+        android:title="@string/menu_toko" />
 </menu>

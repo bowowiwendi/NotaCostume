@@ -31,9 +31,12 @@
     <string name="menu_riwayat">Riwayat</string>
     <string name="menu_settings">Pengaturan</string>
     <string name="menu_kalkulator">Kalkulator</string>
+    <string name="menu_toko">Toko</string>
     <string name="share_title">Bagikan Nota</string>
     <string name="share_text">Nota pembelian %1$s</string>
 
+    <string name="export_csv">Ekspor ke CSV</string>
+    <string name="export_excel">Ekspor ke Excel</string>
     <string name="export_done">File CSV tersimpan di folder Downloads: %1$s</string>
     <string name="export_empty">Belum ada nota untuk di-export</string>
 
@@ -56,27 +59,12 @@
     <string name="menu_edit">Edit</string>
     <string name="search_hint">Cari nota…</string>
 
-    <string name="label_nama_penjual">Nama Penjual (opsional)</string>
-    <string name="section_lampiran">Lampiran</string>
-    <string name="label_foto">Bukti Foto Barang</string>
-    <string name="btn_tambah_foto">Tambah Foto</string>
-    <string name="btn_hapus_foto">Hapus Foto</string>
-    <string name="label_ttd">Tanda Tangan Penjual</string>
-    <string name="btn_ttd">Buat Tanda Tangan</string>
-    <string name="btn_ttd_hapus">Hapus Tanda Tangan</string>
-    <string name="ttd_title">Tanda Tangan Penjual</string>
-    <string name="ttd_hint">Tanda tangan di area ini</string>
-    <string name="ttd_hapus_dialog">Hapus tanda tangan ini?</string>
-    <string name="bersihkan">Bersihkan</string>
-
     <!-- Export strings -->
     <string name="export_title">Ekspor Data</string>
-    <string name="export_csv">Ekspor ke CSV</string>
-    <string name="export_excel">Ekspor ke Excel</string>
     <string name="export_success">File berhasil diekspor: %1$s</string>
     <string name="export_failed">Gagal mengekspor file</string>
     <string name="export_no_data">Tidak ada data untuk diekspor</string>
-    
+
     <!-- Settings strings -->
     <string name="settings_title">Pengaturan</string>
     <string name="pref_theme">Tema Aplikasi</string>
@@ -84,4 +72,27 @@
     <string name="pref_theme_dark">Gelap</string>
     <string name="pref_theme_system">Ikuti Sistem</string>
     <string name="pref_theme_summary">Pilih tema tampilan aplikasi</string>
+
+    <!-- Multi Toko -->
+    <string name="dialog_toko_title">Kelola Toko</string>
+    <string name="dialog_toko_add">Tambah Toko</string>
+    <string name="dialog_toko_edit">Edit Toko</string>
+    <string name="dialog_toko_hapus">Hapus</string>
+    <string name="dialog_toko_aktifkan">Jadikan Aktif</string>
+    <string name="label_nama_toko">Nama Toko</string>
+    <string name="label_alamat_toko">Alamat</string>
+    <string name="label_telepon_toko">Telepon</string>
+    <string name="toko_aktif">Aktif</string>
+    <string name="toko_tidak_aktif">Tidak Aktif</string>
+    <string name="hapus_toko_konfirmasi">Hapus toko ini? Nota yang sudah ada tidak terhapus.</string>
+    <string name="minimal_satu_toko">Minimal satu toko harus ada</string>
+
+    <!-- Signature strings -->
+    <string name="label_nama_penjual">Nama Penjual</string>
+    <string name="label_ttd_penjual">Tanda Tangan Penjual</string>
+    <string name="btn_ttd_clear">Bersihkan</string>
+    <string name="btn_ttd_simpan">Simpan TTD</string>
+    <string name="title_signature">Tanda Tangan</string>
+    <string name="btn_foto">Ambil Foto</string>
+    <string name="foto_nota">Foto Nota</string>
 </resources>
