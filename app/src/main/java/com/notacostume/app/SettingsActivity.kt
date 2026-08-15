@@ -14,12 +14,13 @@ class SettingsActivity : AppCompatActivity() {
         ActivityResultContracts.OpenDocumentTree()
     ) { uri ->
         if (uri != null) {
-            contentResolver.takePersistableUriPermission(
-                uri,
-                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            )
-            BackupManager.backupDb(this, uri)
-            BackupManager.backupCsv(this, uri, NotaDbHelper(this).getAll())
+            try {
+                contentResolver.takePersistableUriPermission(
+                    uri,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+                )
+            } catch (_: Exception) { /* beberapa provider tidak support persist */ }
+            BackupManager.backupAll(this, uri)
         }
     }
 

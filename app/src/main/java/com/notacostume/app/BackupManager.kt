@@ -1,10 +1,8 @@
 package com.notacostume.app
 
 import android.content.Context
-import android.database.Cursor
 import android.net.Uri
 import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
 import androidx.documentfile.provider.DocumentFile
 import java.io.File
 import java.text.SimpleDateFormat
@@ -42,6 +40,18 @@ object BackupManager {
             Toast.makeText(context, "Backup berhasil: ${target.name}", Toast.LENGTH_LONG).show()
         } catch (e: Exception) {
             Toast.makeText(context, "Backup gagal: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    fun backupAll(context: Context, treeUri: Uri) {
+        backupDb(context, treeUri)
+        try {
+            val notas = NotaDbHelper(context).getAll()
+            if (notas.isNotEmpty()) {
+                backupCsv(context, treeUri, notas)
+            }
+        } catch (_: Exception) {
+            // CSV optional, jangan gagalkan backup DB
         }
     }
 
