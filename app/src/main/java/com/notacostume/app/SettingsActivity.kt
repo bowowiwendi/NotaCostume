@@ -1,13 +1,14 @@
 package com.notacostume.app
 
-import android.os.Bundle
 import android.content.res.Configuration
+import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 
 class SettingsActivity : AppCompatActivity() {
@@ -17,9 +18,6 @@ class SettingsActivity : AppCompatActivity() {
     ) { uri ->
         if (uri != null) BackupManager.restoreFromUri(this, uri)
     }
-
-    // Hindari listener terpicu saat kita set state awal (check()) di onCreate
-    private var isInitializing = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,16 +31,17 @@ class SettingsActivity : AppCompatActivity() {
             val currentMode = prefs.getString("theme_preference", "system") ?: "system"
 
             val toggle = findViewById<MaterialButtonToggleGroup>(R.id.themeToggle)
-            val checkedId = when (currentMode) {
+            // Set pilihan awal tanpa memicu listener (singleSelection menjamin 1 saja)
+            val initialId = when (currentMode) {
                 "light" -> R.id.btnThemeLight
                 "dark" -> R.id.btnThemeDark
                 else -> R.id.btnThemeSystem
             }
-            toggle.check(checkedId)
+            toggle.check(initialId)
 
-            // Listener baru aktif SETELAH init selesai
             toggle.addOnButtonCheckedListener { _, id, isChecked ->
-                if (isInitializing || !isChecked) return@addOnButtonCheckedListener
+                // Hanya proses saat tombol DIPENCET (isChecked=true) dan itu selection baru
+                if (!isChecked) return@addOnButtonCheckedListener
                 val (pref, mode) = when (id) {
                     R.id.btnThemeLight -> "light" to AppCompatDelegate.MODE_NIGHT_NO
                     R.id.btnThemeDark -> "dark" to AppCompatDelegate.MODE_NIGHT_YES
@@ -52,12 +51,11 @@ class SettingsActivity : AppCompatActivity() {
                 // configChanges="uiMode" cegah recreate -> apply in-place tanpa kedip
                 AppCompatDelegate.setDefaultNightMode(mode)
             }
-            isInitializing = false
 
-            findViewById<com.google.android.material.button.MaterialButton>(R.id.btnBackup)
+            findViewById<MaterialButton>(R.id.btnBackup)
                 .setOnClickListener { BackupManager.backupLocal(this) }
 
-            findViewById<com.google.android.material.button.MaterialButton>(R.id.btnRestore)
+            findViewById<MaterialButton>(R.id.btnRestore)
                 .setOnClickListener {
                     pickRestoreFile.launch(arrayOf("application/octet-stream", "*/*"))
                 }
