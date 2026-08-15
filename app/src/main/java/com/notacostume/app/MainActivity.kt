@@ -32,11 +32,6 @@ class MainActivity : AppCompatActivity() {
 
         b.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                R.id.menu_theme -> {
-                    // Satu-satunya pengatur tema ada di Settings (hindari duplikasi/bentrok)
-                    startActivity(Intent(this, SettingsActivity::class.java))
-                    true
-                }
                 R.id.menu_settings -> {
                     startActivity(Intent(this, SettingsActivity::class.java))
                     true
