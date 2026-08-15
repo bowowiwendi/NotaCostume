@@ -44,7 +44,7 @@ object BackupManager {
                     return@Thread
                 }
 
-                // 1) Backup DB
+                // 1) Backup DB nota
                 val dbUri = writeToStorage(context, dbName, "application/octet-stream") { out ->
                     src.inputStream().use { it.copyTo(out) }
                 }
@@ -53,13 +53,25 @@ object BackupManager {
                     return@Thread
                 }
 
+                // 1b) Backup data toko (SharedPreferences: toko_prefs.xml)
+                try {
+                    val prefsDir = File(context.applicationInfo.dataDir, "shared_prefs")
+                    val tokoFile = File(prefsDir, "toko_prefs.xml")
+                    if (tokoFile.exists()) {
+                        val tokoName = "NotaCostume-toko-$ts.xml"
+                        writeToStorage(context, tokoName, "application/octet-stream") { out ->
+                            tokoFile.inputStream().use { it.copyTo(out) }
+                        }
+                    }
+                } catch (_: Exception) { /* toko optional */ }
+
                 // 2) Backup CSV (optional)
                 try {
                     val notas = NotaDbHelper(context).getAll()
                     if (notas.isNotEmpty()) {
                         val csv = CsvExporter.buildCsvString(notas)
                         writeToStorage(context, csvName, "text/csv") { out ->
-                            out.write("\uFEFF$csv".toByteArray(Charsets.UTF_8))
+                            out.write("﻿$csv".toByteArray(Charsets.UTF_8))
                         }
                     }
                 } catch (_: Exception) { /* CSV optional */ }
@@ -119,12 +131,50 @@ object BackupManager {
                 srcStream.use { input ->
                     dest.outputStream().use { output -> input.copyTo(output) }
                 }
+
+                // Restore data toko dari file toko terbaru di folder backup (jika ada)
+                try {
+                    restoreTokoFromBackup(context)
+                } catch (_: Exception) { /* toko optional */ }
+
                 toast(context, "Restore berhasil. Tutup & buka ulang aplikasi.")
             } catch (e: Exception) {
                 logCrash(context, "restoreFromUri", e)
                 toast(context, "Restore gagal: ${e.message}")
             }
         }.start()
+    }
+
+    private fun restoreTokoFromBackup(context: Context) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Q+: baca lewat MediaStore
+            val uri = MediaStore.Downloads.EXTERNAL_CONTENT_URI
+            val sel = "${MediaStore.Downloads.RELATIVE_PATH}=? AND ${MediaStore.Downloads.DISPLAY_NAME} LIKE ?"
+            val args = arrayOf(Environment.DIRECTORY_DOWNLOADS + "/$FOLDER", "NotaCostume-toko-%")
+            val c = context.contentResolver.query(uri, null, sel, args, "${MediaStore.Downloads.DISPLAY_NAME} DESC")
+            c?.use { cur ->
+                if (cur.moveToFirst()) {
+                    val fileUri = MediaStore.Downloads.EXTERNAL_CONTENT_URI.buildUpon()
+                        .appendPath(cur.getString(cur.getColumnIndex(MediaStore.Downloads._ID))).build()
+                    copyTokoFile(context, fileUri)
+                }
+            }
+        } else {
+            val folder = File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                FOLDER
+            )
+            folder.listFiles { _, n -> n.startsWith("NotaCostume-toko-") }
+                ?.maxByOrNull { it.name }?.let { copyTokoFile(context, Uri.fromFile(it)) }
+        }
+    }
+
+    private fun copyTokoFile(context: Context, srcUri: Uri) {
+        context.contentResolver.openInputStream(srcUri)?.use { input ->
+            val dest = File(context.applicationInfo.dataDir, "shared_prefs/toko_prefs.xml")
+            dest.parentFile?.mkdirs()
+            dest.outputStream().use { out -> input.copyTo(out) }
+        }
     }
 
     private fun logCrash(context: Context, where: String, e: Exception) {

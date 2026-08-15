@@ -80,6 +80,16 @@ class FormFragment : Fragment() {
         }
         b.btnHapusFoto.setOnClickListener { hapusFoto() }
 
+        // Dropdown nama toko (prediksi + ketik manual)
+        val tokoNames = TokoManager.getAll(requireContext()).map { it.nama }.distinct()
+        val tokoAdapter = android.widget.ArrayAdapter(
+            requireContext(),
+            android.R.layout.simple_dropdown_item_1line,
+            tokoNames
+        )
+        b.etToko.setAdapter(tokoAdapter)
+        b.etToko.threshold = 1
+
         editId = arguments?.getLong(ARG_NOTA_ID) ?: 0L
         if (editId > 0) loadNota(editId)
     }
@@ -271,9 +281,11 @@ class FormFragment : Fragment() {
             b.root.findViewById<View>(v).let { if (it is EditText) it.text = null }
         }
         b.etTanggal.setText(fmtDate.format(Date()))
-        hapusFoto()
-        File(ttdPath).takeIf { it.exists() }?.delete()
+        // JANGAN hapus file ttd/foto fisik — itu sudah jadi milik nota yang baru disimpan.
+        // Cukup reset variabel path agar form bersih untuk nota berikutnya.
+        fotoPath = ""
         ttdPath = ""
+        showFotoPreview()
         showTtdPreview()
         b.llItems.removeAllViews()
         addItemRow()

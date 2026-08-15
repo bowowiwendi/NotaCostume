@@ -246,11 +246,11 @@ object NotaPrinter {
                 )
             }
         }
-        val penjualLabel = nota.namaPenjual.ifBlank { "Penjual" }
+        // Label "Penjual" statis DI ATAS garis (menandakan ini tempat ttd penjual)
+        val penjualLabel = "Penjual"
         p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
         p.textSize = 10f
         p.textAlign = Paint.Align.RIGHT
-        // Label "Penjual" di ATAS garis tanda tangan (tepat di bawah gambar ttd)
         if (nota.ttdPenjual.isNotBlank()) {
             val sig = BitmapFactory.decodeFile(nota.ttdPenjual)
             if (sig != null) {
@@ -266,6 +266,12 @@ object NotaPrinter {
         }
         p.strokeWidth = 1f
         canvas.drawLine(sigLeft, bottom, sigRight, bottom, p)
+        // Nama penjual (input user) DI BAWAH garis
+        val namaP = nota.namaPenjual.ifBlank { "" }
+        if (namaP.isNotBlank()) {
+            p.textSize = 10f
+            canvas.drawText(namaP, sigRight, bottom + 14f, p)
+        }
 
         canvas.restore()
     }
