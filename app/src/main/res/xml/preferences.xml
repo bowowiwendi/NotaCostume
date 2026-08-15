@@ -13,14 +13,14 @@
 
     <PreferenceCategory android:title="@string/pengaturan_backup">
         <Preference
-            android:key="backup_drive"
-            android:title="@string/backup_ke_drive"
-            android:summary="@string/backup_ke_drive_summary"
+            android:key="backup_local"
+            android:title="@string/backup_lokal"
+            android:summary="@string/backup_lokal_summary"
             android:icon="@drawable/ic_store" />
         <Preference
             android:key="restore_drive"
-            android:title="@string/restore_dari_drive"
-            android:summary="@string/restore_dari_drive_summary"
+            android:title="@string/restore_dari_file"
+            android:summary="@string/restore_dari_file_summary"
             android:icon="@android:drawable/ic_menu_revert" />
     </PreferenceCategory>
 </PreferenceScreen>

@@ -1,25 +1,29 @@
 package com.notacostume.app
 
+import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
+import android.os.Build
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
+import android.provider.MediaStore
 import android.widget.Toast
-import androidx.documentfile.provider.DocumentFile
 import java.io.File
-import java.io.FileWriter
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 /**
- * Backup & restore database SQLite ke folder yang dipilih user via SAF
- * (bisa folder Google Drive). Tidak butuh API key / rclone.
- * Semua I/O dijalankan di background thread agar tidak ANR/crash di UI thread.
+ * Backup & restore LOKAL (tanpa Google Drive / SAF picker).
+ * Backup langsung ke folder Download/NotaCostume via MediaStore (API 29+)
+ * atau ke external files app (legacy). Tidak butuh permission tambahan.
+ * Semua I/O di background thread agar tidak ANR/crash.
  */
 object BackupManager {
 
     private const val DB_NAME = "nota.db"
+    private const val FOLDER = "NotaCostume"
     private val sdf = SimpleDateFormat("yyyyMMdd-HHmm", Locale.getDefault())
 
     private fun toast(context: Context, msg: String) {
@@ -28,51 +32,84 @@ object BackupManager {
         }
     }
 
-    fun backupAll(context: Context, treeUri: Uri) {
+    fun backupLocal(context: Context) {
         Thread {
             try {
-                val tree = DocumentFile.fromTreeUri(context, treeUri)
-                if (tree == null || !tree.isDirectory) {
-                    toast(context, "Folder tidak valid")
+                val ts = sdf.format(Date())
+                val dbName = "NotaCostume-backup-$ts.db"
+                val csvName = "NotaCostume-riwayat-$ts.csv"
+                val src = File(context.getDatabasePath(DB_NAME).absolutePath)
+                if (!src.exists()) {
+                    toast(context, "Database belum ada")
                     return@Thread
                 }
-                backupDbInternal(context, tree)
+
+                // 1) Backup DB
+                val dbUri = writeToStorage(context, dbName, "application/octet-stream") { out ->
+                    src.inputStream().use { it.copyTo(out) }
+                }
+                if (dbUri == null) {
+                    toast(context, "Gagal menyimpan backup DB")
+                    return@Thread
+                }
+
+                // 2) Backup CSV (optional)
                 try {
                     val notas = NotaDbHelper(context).getAll()
-                    if (notas.isNotEmpty()) backupCsvInternal(context, tree, notas)
-                } catch (_: Exception) {
-                    // CSV optional
-                }
-                toast(context, "Backup selesai")
+                    if (notas.isNotEmpty()) {
+                        val csv = CsvExporter.buildCsvString(notas)
+                        writeToStorage(context, csvName, "text/csv") { out ->
+                            out.write("\uFEFF$csv".toByteArray(Charsets.UTF_8))
+                        }
+                    }
+                } catch (_: Exception) { /* CSV optional */ }
+
+                toast(context, "Backup lokal selesai:\nDownload/$FOLDER/$dbName")
             } catch (e: Exception) {
-                logCrash(context, "backupAll", e)
+                logCrash(context, "backupLocal", e)
                 toast(context, "Backup gagal: ${e.message}")
             }
         }.start()
     }
 
-    private fun backupDbInternal(context: Context, tree: DocumentFile) {
-        val ts = sdf.format(Date())
-        val target = tree.createFile("application/octet-stream", "NotaCostume-backup-$ts.db")
-            ?: throw Exception("Gagal membuat file di folder tujuan")
-        val src = File(context.getDatabasePath(DB_NAME).absolutePath)
-        if (!src.exists()) throw Exception("Database belum ada")
-        context.contentResolver.openOutputStream(target.uri)?.use { out ->
-            src.inputStream().use { it.copyTo(out) }
+    /**
+     * Tulis file ke Download/NotaCostume (Q+) atau external files app (legacy).
+     * Mengembalikan Uri hasil, atau null kalau gagal.
+     */
+    private fun writeToStorage(
+        context: Context,
+        fileName: String,
+        mime: String,
+        writer: (java.io.OutputStream) -> Unit
+    ): Uri? {
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val values = ContentValues().apply {
+                    put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+                    put(MediaStore.Downloads.MIME_TYPE, mime)
+                    put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/$FOLDER")
+                }
+                val uri = context.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
+                    ?: return null
+                context.contentResolver.openOutputStream(uri)?.use { writer(it) }
+                uri
+            } else {
+                val dir = File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                    FOLDER
+                )
+                dir.mkdirs()
+                val file = File(dir, fileName)
+                file.outputStream().use { writer(it) }
+                Uri.fromFile(file)
+            }
+        } catch (e: Exception) {
+            null
         }
     }
 
-    private fun backupCsvInternal(context: Context, tree: DocumentFile, notas: List<Nota>) {
-        if (notas.isEmpty()) return
-        val ts = sdf.format(Date())
-        val target = tree.createFile("text/csv", "NotaCostume-riwayat-$ts.csv") ?: return
-        val csv = CsvExporter.buildCsvString(notas)
-        context.contentResolver.openOutputStream(target.uri)?.use { out ->
-            out.write("\uFEFF$csv".toByteArray(Charsets.UTF_8))
-        }
-    }
-
-    fun restoreDb(context: Context, fileUri: Uri) {
+    /** Restore dari file yang dipilih user (picker). Berjalan di background. */
+    fun restoreFromUri(context: Context, fileUri: Uri) {
         Thread {
             try {
                 val srcStream = context.contentResolver.openInputStream(fileUri)
@@ -84,7 +121,7 @@ object BackupManager {
                 }
                 toast(context, "Restore berhasil. Tutup & buka ulang aplikasi.")
             } catch (e: Exception) {
-                logCrash(context, "restoreDb", e)
+                logCrash(context, "restoreFromUri", e)
                 toast(context, "Restore gagal: ${e.message}")
             }
         }.start()
@@ -93,9 +130,7 @@ object BackupManager {
     private fun logCrash(context: Context, where: String, e: Exception) {
         try {
             val log = File(context.getExternalFilesDir(null), "backup_error.log")
-            FileWriter(log, true).use { fw ->
-                fw.append("\n[${sdf.format(Date())}] $where: ${e.stackTraceToString()}\n")
-            }
+            log.appendText("\n[${sdf.format(Date())}] $where: ${e.stackTraceToString()}\n")
         } catch (_: Exception) {
         }
     }

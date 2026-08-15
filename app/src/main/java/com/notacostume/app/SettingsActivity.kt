@@ -10,24 +10,10 @@ import androidx.preference.PreferenceFragmentCompat
 
 class SettingsActivity : AppCompatActivity() {
 
-    private val pickBackupDir = registerForActivityResult(
-        ActivityResultContracts.OpenDocumentTree()
-    ) { uri ->
-        if (uri != null) {
-            try {
-                contentResolver.takePersistableUriPermission(
-                    uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-                )
-            } catch (_: Exception) { /* beberapa provider tidak support persist */ }
-            BackupManager.backupAll(this, uri)
-        }
-    }
-
     private val pickRestoreFile = registerForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri ->
-        if (uri != null) BackupManager.restoreDb(this, uri)
+        if (uri != null) BackupManager.restoreFromUri(this, uri)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,8 +42,8 @@ class SettingsActivity : AppCompatActivity() {
                 true
             }
 
-            findPreference<Preference>("backup_drive")?.setOnPreferenceClickListener {
-                pickBackupDir.launch(null)
+            findPreference<Preference>("backup_local")?.setOnPreferenceClickListener {
+                BackupManager.backupLocal(this@SettingsActivity)
                 true
             }
 

@@ -102,9 +102,9 @@
     <string name="ttd_hapus_dialog">Hapus tanda tangan ini?</string>
     <string name="pengaturan_tampilan">Tampilan</string>
     <string name="pengaturan_backup">Backup &amp; Restore</string>
-    <string name="backup_ke_drive">Backup ke Google Drive</string>
-    <string name="backup_ke_drive_summary">Simpan database &amp; CSV ke folder pilihan (Drive/Dokumen)</string>
-    <string name="restore_dari_drive">Restore dari Google Drive</string>
-    <string name="restore_dari_drive_summary">Pulihkan database dari file backup</string>
+    <string name="backup_lokal">Backup Lokal</string>
+    <string name="backup_lokal_summary">Simpan database &amp; CSV ke folder Download/NotaCostume</string>
+    <string name="restore_dari_file">Restore dari File</string>
+    <string name="restore_dari_file_summary">Pulihkan database dari file backup (.db)</string>
     <string name="bersihkan">Bersihkan</string>
 </resources>
