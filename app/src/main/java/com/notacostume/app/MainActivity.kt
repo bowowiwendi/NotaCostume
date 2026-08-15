@@ -2,7 +2,6 @@ package com.notacostume.app
 
 import android.content.Intent
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.fragment.app.Fragment
@@ -33,7 +32,11 @@ class MainActivity : AppCompatActivity() {
 
         b.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
-                R.id.menu_theme -> { showThemeDialog(); true }
+                R.id.menu_theme -> {
+                    // Satu-satunya pengatur tema ada di Settings (hindari duplikasi/bentrok)
+                    startActivity(Intent(this, SettingsActivity::class.java))
+                    true
+                }
                 R.id.menu_settings -> {
                     startActivity(Intent(this, SettingsActivity::class.java))
                     true
@@ -95,38 +98,6 @@ class MainActivity : AppCompatActivity() {
             else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         }
         AppCompatDelegate.setDefaultNightMode(nightMode)
-    }
-
-    private fun showThemeDialog() {
-        val modes = intArrayOf(
-            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
-            AppCompatDelegate.MODE_NIGHT_NO,
-            AppCompatDelegate.MODE_NIGHT_YES
-        )
-        val labels = arrayOf(
-            getString(R.string.theme_sistem),
-            getString(R.string.theme_terang),
-            getString(R.string.theme_gelap)
-        )
-        var selected = modes.indexOf(AppCompatDelegate.getDefaultNightMode()).coerceAtLeast(0)
-
-        AlertDialog.Builder(this)
-            .setTitle(R.string.theme_title)
-            .setSingleChoiceItems(labels, selected) { _, which -> selected = which }
-            .setPositiveButton("OK") { _, _ ->
-                AppCompatDelegate.setDefaultNightMode(modes[selected])
-                val pref = when (selected) {
-                    1 -> "light"
-                    2 -> "dark"
-                    else -> "system"
-                }
-                PreferenceManager.getDefaultSharedPreferences(this)
-                    .edit()
-                    .putString("theme_preference", pref)
-                    .apply()
-            }
-            .setNegativeButton(R.string.batal, null)
-            .show()
     }
 
     companion object {
