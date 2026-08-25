@@ -77,11 +77,13 @@ class NotaDetailActivity : AppCompatActivity() {
         try {
             b.toolbar.subtitle = n.nomor
             val density = resources.displayMetrics.density
-            val width = (resources.displayMetrics.widthPixels - (32 * density).toInt())
+            val screenW = resources.displayMetrics.widthPixels
+            val width = (screenW * 0.88f).toInt()
+            if (width < 100) { finish(); return }
             val bmp = NotaPrinter.preview(n, getString(R.string.toko_nama), width)
             b.ivPreview.setImageBitmap(bmp)
         } catch (e: Exception) {
-            Toast.makeText(this, "Gagal render nota: ${e.localizedMessage ?: e.javaClass.simpleName}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Gagal render: ${e.localizedMessage ?: e.javaClass.simpleName}", Toast.LENGTH_LONG).show()
             finish()
         }
     }

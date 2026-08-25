@@ -126,15 +126,16 @@ class FormFragment : Fragment() {
     }
 
     private fun loadNota(id: Long) {
+        val binding = _b ?: return
         val nota = db.getById(id) ?: return
         existingNomor = nota.nomor
-        b.etToko.setText(nota.toko)
-        b.etTanggal.setText(nota.tanggal)
-        b.etCatatan.setText(nota.catatan)
-        b.etNamaPenjual.setText(nota.namaPenjual)
+        binding.etToko.setText(nota.toko)
+        binding.etTanggal.setText(nota.tanggal)
+        binding.etCatatan.setText(nota.catatan)
+        binding.etNamaPenjual.setText(nota.namaPenjual)
         fotoPath = nota.foto
         ttdPath = nota.ttdPenjual
-        b.llItems.removeAllViews()
+        binding.llItems.removeAllViews()
         if (nota.items.isEmpty()) addItemRow()
         nota.items.forEach { addItemRow(it.nama, it.jumlah, it.harga) }
         showFotoPreview()
@@ -148,7 +149,8 @@ class FormFragment : Fragment() {
     }
 
     private fun addItemRow(nama: String = "", jumlah: Int = 1, harga: Long = 0L) {
-        val binding = ItemBarangBinding.inflate(layoutInflater, b.llItems, false)
+        val binding2 = _b ?: return
+        val binding = ItemBarangBinding.inflate(layoutInflater, binding2.llItems, false)
         val watcher = object : TextWatcher {
             override fun afterTextChanged(s: Editable?) = updateSummary()
             override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
@@ -163,16 +165,17 @@ class FormFragment : Fragment() {
         if (harga > 0) binding.etHarga.setText(harga.toString())
 
         binding.btnHapusItem.setOnClickListener {
-            b.llItems.removeView(binding.root)
-            if (b.llItems.childCount == 0) addItemRow()
+            binding2.llItems.removeView(binding.root)
+            if (binding2.llItems.childCount == 0) addItemRow()
             updateSummary()
         }
-        b.llItems.addView(binding.root)
+        binding2.llItems.addView(binding.root)
     }
 
-    private fun readItems(): List<NotaItem> =
-        (0 until b.llItems.childCount).mapNotNull { i ->
-            val row = b.llItems.getChildAt(i) as View
+    private fun readItems(): List<NotaItem> {
+        val binding = _b ?: return emptyList()
+        return (0 until binding.llItems.childCount).mapNotNull { i ->
+            val row = binding.llItems.getChildAt(i) as View
             val nama = row.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etBarang).text.toString().trim()
             if (nama.isEmpty()) return@mapNotNull null
             NotaItem(
@@ -181,10 +184,12 @@ class FormFragment : Fragment() {
                 harga = Rupiah.parse(row.findViewById<com.google.android.material.textfield.TextInputEditText>(R.id.etHarga).text.toString())
             )
         }
+    }
 
     private fun updateSummary() {
+        val binding = _b ?: return
         val total = readItems().sumOf { it.total }
-        b.tvTotal.text = Rupiah.format(total)
+        binding.tvTotal.text = Rupiah.format(total)
     }
 
     private fun pickDate(onPick: (String) -> Unit) {
@@ -196,24 +201,26 @@ class FormFragment : Fragment() {
     }
 
     private fun showFotoPreview() {
+        val binding = _b ?: return
         val f = File(fotoPath)
         if (fotoPath.isNotBlank() && f.exists()) {
-            b.ivFoto.setImageURI(Uri.fromFile(f))
-            b.fotoContainer.visibility = View.VISIBLE
+            binding.ivFoto.setImageURI(Uri.fromFile(f))
+            binding.fotoContainer.visibility = View.VISIBLE
         } else {
-            b.fotoContainer.visibility = View.GONE
+            binding.fotoContainer.visibility = View.GONE
         }
     }
 
     private fun showTtdPreview() {
+        val binding = _b ?: return
         val f = File(ttdPath)
         if (ttdPath.isNotBlank() && f.exists()) {
-            b.ivTtd.setImageURI(Uri.fromFile(f))
-            b.ivTtd.visibility = View.VISIBLE
-            b.btnHapusTtd.visibility = View.VISIBLE
+            binding.ivTtd.setImageURI(Uri.fromFile(f))
+            binding.ivTtd.visibility = View.VISIBLE
+            binding.btnHapusTtd.visibility = View.VISIBLE
         } else {
-            b.ivTtd.visibility = View.GONE
-            b.btnHapusTtd.visibility = View.GONE
+            binding.ivTtd.visibility = View.GONE
+            binding.btnHapusTtd.visibility = View.GONE
         }
     }
 
@@ -265,21 +272,22 @@ class FormFragment : Fragment() {
     }
 
     private fun simpanNota() {
+        val binding = _b ?: return
         try {
             val items = readItems()
             if (items.isEmpty()) {
                 Toast.makeText(requireContext(), R.string.isi_lengkap, Toast.LENGTH_SHORT).show()
                 return
             }
-            val namaPenjual = b.etNamaPenjual.text.toString().trim()
-            val tokoName = b.etToko.text.toString().trim().ifBlank { getString(R.string.toko_nama) }
+            val namaPenjual = binding.etNamaPenjual.text.toString().trim()
+            val tokoName = binding.etToko.text.toString().trim().ifBlank { getString(R.string.toko_nama) }
             if (editId > 0) {
                 val nota = Nota(
                     id = editId,
                     nomor = existingNomor,
                     toko = tokoName,
-                    tanggal = b.etTanggal.text.toString().ifBlank { fmtDate.format(Date()) },
-                    catatan = b.etCatatan.text.toString().trim(),
+                    tanggal = binding.etTanggal.text.toString().ifBlank { fmtDate.format(Date()) },
+                    catatan = binding.etCatatan.text.toString().trim(),
                     dibuatPada = System.currentTimeMillis(),
                     namaPenjual = namaPenjual,
                     ttdPenjual = ttdPath,
@@ -294,8 +302,8 @@ class FormFragment : Fragment() {
             val nota = Nota(
                 nomor = db.nextNomor(),
                 toko = tokoName,
-                tanggal = b.etTanggal.text.toString().ifBlank { fmtDate.format(Date()) },
-                catatan = b.etCatatan.text.toString().trim(),
+                tanggal = binding.etTanggal.text.toString().ifBlank { fmtDate.format(Date()) },
+                catatan = binding.etCatatan.text.toString().trim(),
                 dibuatPada = System.currentTimeMillis(),
                 namaPenjual = namaPenjual,
                 ttdPenjual = ttdPath,
@@ -310,27 +318,28 @@ class FormFragment : Fragment() {
     }
 
     private fun clearForm() {
+        val binding = _b ?: return
         for (v in intArrayOf(R.id.etToko, R.id.etTanggal, R.id.etCatatan, R.id.etNamaPenjual)) {
-            b.root.findViewById<View>(v).let { if (it is EditText) it.text = null }
+            binding.root.findViewById<View>(v).let { if (it is EditText) it.text = null }
         }
-        b.etTanggal.setText(fmtDate.format(Date()))
-        // JANGAN hapus file ttd/foto fisik — itu sudah jadi milik nota yang baru disimpan.
-        // Cukup reset variabel path agar form bersih untuk nota berikutnya.
+        binding.etTanggal.setText(fmtDate.format(Date()))
         fotoPath = ""
         ttdPath = ""
         showFotoPreview()
         showTtdPreview()
-        b.llItems.removeAllViews()
+        binding.llItems.removeAllViews()
         addItemRow()
         updateSummary()
     }
 
     private fun showPrintAnimation(notaId: Long) {
-        if (!isAdded) return
-        val activity = requireActivity()
+        val ctx = context ?: return
+        val activity = activity ?: return
+        if (activity.isFinishing || activity.isDestroyed) return
+
         val rootView = activity.findViewById<ViewGroup>(android.R.id.content)
 
-        val overlay = LayoutInflater.from(requireContext())
+        val overlay = LayoutInflater.from(ctx)
             .inflate(R.layout.layout_print_overlay, rootView, false)
         rootView.addView(overlay)
 
@@ -339,7 +348,7 @@ class FormFragment : Fragment() {
         val progressBar = overlay.findViewById<ProgressBar>(R.id.progressPrint)
         val receiptPaper = overlay.findViewById<View>(R.id.receiptPaper)
 
-        // Receipt starts hidden inside printer (clipped above), slides down
+        // Receipt slides down from printer
         receiptPaper.translationY = -60f
         receiptPaper.alpha = 0f
         receiptPaper.animate()
@@ -354,7 +363,6 @@ class FormFragment : Fragment() {
         var progress = 0
         val progressRunnable = object : Runnable {
             override fun run() {
-                if (!isAdded) return
                 progress += 2
                 progressBar.progress = progress
                 if (progress < 100) {
@@ -364,35 +372,27 @@ class FormFragment : Fragment() {
         }
         progressHandler.postDelayed(progressRunnable, 200)
 
-        // After printing animation, show success
+        // Success message
         Handler(Looper.getMainLooper()).postDelayed({
-            if (!isAdded) return@postDelayed
+            if (activity.isFinishing || activity.isDestroyed) return@postDelayed
             tvStatus.text = getString(R.string.print_berhasil)
+            tvSubStatus.text = getString(R.id.tvPrintSubStatus) // keep original sub
             tvSubStatus.text = getString(R.string.print_selesai)
             progressBar.visibility = View.GONE
         }, 2500)
 
-        // Dismiss overlay and navigate to detail
+        // Navigate to detail
         Handler(Looper.getMainLooper()).postDelayed({
-            if (!isAdded) return@postDelayed
-            clearForm()
+            if (activity.isFinishing || activity.isDestroyed) return@postDelayed
+            try { clearForm() } catch (_: Exception) {}
             onNotaSaved?.invoke()
-
-            overlay.animate()
-                .alpha(0f)
-                .setDuration(300)
-                .withEndAction {
-                    try {
-                        rootView.removeView(overlay)
-                    } catch (_: Exception) {}
-                    try {
-                        val intent = Intent(requireContext(), NotaDetailActivity::class.java)
-                        intent.putExtra("id", notaId)
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        startActivity(intent)
-                    } catch (_: Exception) {}
-                }
-                .start()
+            try { rootView.removeView(overlay) } catch (_: Exception) {}
+            try {
+                val intent = Intent(ctx, NotaDetailActivity::class.java)
+                intent.putExtra("id", notaId)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                startActivity(intent)
+            } catch (_: Exception) {}
         }, 3500)
     }
 }
