@@ -8,36 +8,135 @@
     android:focusable="true">
 
     <LinearLayout
-        android:layout_width="240dp"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:background="@drawable/bg_print_dialog"
-        android:padding="28dp">
+        android:gravity="center_horizontal">
 
-        <!-- Printer Icon -->
-        <ImageView
-            android:id="@+id/ivPrinterIcon"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:src="@drawable/ic_print_large"
-            android:contentDescription="@string/btn_print" />
-
-        <!-- Receipt paper animation area -->
+        <!-- ══ Mini Printer Body ══ -->
         <FrameLayout
-            android:layout_width="120dp"
-            android:layout_height="100dp"
-            android:layout_marginTop="16dp"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_printer_body">
+
+            <!-- Printer top surface -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="12dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="6dp">
+
+                <!-- LED -->
+                <View
+                    android:id="@+id/viewLed"
+                    android:layout_width="8dp"
+                    android:layout_height="8dp"
+                    android:background="@drawable/bg_printer_led" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:text="Nota Costume"
+                    android:textColor="#D1D5DB"
+                    android:textSize="10sp" />
+
+                <ImageView
+                    android:id="@+id/ivPrinterIcon"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_print_large"
+                    android:contentDescription="@string/btn_print" />
+            </LinearLayout>
+
+            <!-- Printer slot (dark gap) -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="4dp"
+                android:layout_marginHorizontal="8dp"
+                android:background="#1F2937" />
+
+        </FrameLayout>
+
+        <!-- ══ Receipt Paper (slides out from slot) ══ -->
+        <FrameLayout
+            android:layout_width="160dp"
+            android:layout_height="0dp"
+            android:layout_gravity="center_horizontal"
             android:clipChildren="true"
             android:clipToPadding="true">
 
-            <View
+            <LinearLayout
                 android:id="@+id/receiptPaper"
-                android:layout_width="100dp"
-                android:layout_height="80dp"
-                android:layout_gravity="bottom|center_horizontal"
-                android:background="@drawable/bg_receipt_paper" />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_receipt_paper"
+                android:padding="12dp"
+                android:gravity="center_horizontal">
+
+                <!-- Mini receipt content preview -->
+                <View
+                    android:layout_width="60dp"
+                    android:layout_height="4dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="#7C3AED" />
+
+                <View
+                    android:layout_width="80dp"
+                    android:layout_height="3dp"
+                    android:layout_marginBottom="4dp"
+                    android:background="#E5E7EB" />
+
+                <View
+                    android:layout_width="100dp"
+                    android:layout_height="2dp"
+                    android:layout_marginBottom="3dp"
+                    android:background="#E5E7EB" />
+
+                <View
+                    android:layout_width="90dp"
+                    android:layout_height="2dp"
+                    android:layout_marginBottom="3dp"
+                    android:background="#E5E7EB" />
+
+                <View
+                    android:layout_width="95dp"
+                    android:layout_height="2dp"
+                    android:layout_marginBottom="3dp"
+                    android:background="#E5E7EB" />
+
+                <View
+                    android:layout_width="85dp"
+                    android:layout_height="2dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="#E5E7EB" />
+
+                <View
+                    android:layout_width="110dp"
+                    android:layout_height="3dp"
+                    android:layout_marginBottom="4dp"
+                    android:background="#22C55E" />
+
+                <View
+                    android:layout_width="70dp"
+                    android:layout_height="2dp"
+                    android:background="#E5E7EB" />
+
+                <!-- Zigzag bottom -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="6dp"
+                    android:layout_marginTop="6dp"
+                    android:background="@drawable/bg_zigzag_small" />
+
+            </LinearLayout>
+
         </FrameLayout>
 
         <!-- Status text -->
@@ -47,7 +146,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:text="@string/print_mencetak"
-            android:textColor="#1F2937"
+            android:textColor="#FFFFFF"
             android:textSize="15sp"
             android:textStyle="bold" />
 
@@ -57,19 +156,19 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="@string/print_mohon_tunggu"
-            android:textColor="#6B7280"
+            android:textColor="#B0B0B0"
             android:textSize="12sp" />
 
         <!-- Progress bar -->
         <ProgressBar
             android:id="@+id/progressPrint"
             style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
+            android:layout_width="180dp"
             android:layout_height="4dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="12dp"
             android:indeterminate="false"
             android:max="100"
-            android:progressDrawable="@drawable/progress_print" />
+            android:progressDrawable="@drawable/progress_print_white" />
 
     </LinearLayout>
 </FrameLayout>

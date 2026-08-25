@@ -11,10 +11,8 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.EditText
-import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -315,17 +313,18 @@ class FormFragment : Fragment() {
             .inflate(R.layout.layout_print_overlay, rootView, false)
         rootView.addView(overlay)
 
-        val ivPrinter = overlay.findViewById<ImageView>(R.id.ivPrinterIcon)
         val tvStatus = overlay.findViewById<TextView>(R.id.tvPrintStatus)
         val tvSubStatus = overlay.findViewById<TextView>(R.id.tvPrintSubStatus)
         val progressBar = overlay.findViewById<ProgressBar>(R.id.progressPrint)
         val receiptPaper = overlay.findViewById<View>(R.id.receiptPaper)
 
-        // Start receipt paper slide-up animation
-        receiptPaper.translationY = 80f
+        // Receipt starts hidden inside printer (clipped above), slides down
+        receiptPaper.translationY = -60f
+        receiptPaper.alpha = 0f
         receiptPaper.animate()
             .translationY(0f)
-            .setDuration(800)
+            .alpha(1f)
+            .setDuration(1500)
             .setInterpolator(DecelerateInterpolator())
             .start()
 
@@ -337,48 +336,34 @@ class FormFragment : Fragment() {
                 progress += 2
                 progressBar.progress = progress
                 if (progress < 100) {
-                    progressHandler.postDelayed(this, 40)
+                    progressHandler.postDelayed(this, 50)
                 }
             }
         }
-        progressHandler.postDelayed(progressRunnable, 300)
+        progressHandler.postDelayed(progressRunnable, 200)
 
         // After printing animation, show success
         Handler(Looper.getMainLooper()).postDelayed({
-            ivPrinter.setImageResource(R.drawable.ic_check_circle_large)
             tvStatus.text = getString(R.string.print_berhasil)
             tvSubStatus.text = getString(R.string.print_selesai)
             progressBar.visibility = View.GONE
-
-            // Success animation
-            ivPrinter.scaleX = 0f
-            ivPrinter.scaleY = 0f
-            ivPrinter.animate()
-                .scaleX(1f)
-                .scaleY(1f)
-                .setDuration(400)
-                .setInterpolator(AccelerateDecelerateInterpolator())
-                .start()
-        }, 2200)
+        }, 2500)
 
         // Dismiss overlay and navigate to detail
         Handler(Looper.getMainLooper()).postDelayed({
-            // Clear form for next nota
             clearForm()
             onNotaSaved?.invoke()
 
-            // Animate overlay out
             overlay.animate()
                 .alpha(0f)
                 .setDuration(300)
                 .withEndAction {
                     rootView.removeView(overlay)
-                    // Navigate to detail
                     val intent = Intent(requireContext(), NotaDetailActivity::class.java)
                     intent.putExtra("id", notaId)
                     startActivity(intent)
                 }
                 .start()
-        }, 3200)
+        }, 3500)
     }
 }
