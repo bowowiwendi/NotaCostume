@@ -164,6 +164,7 @@ object NotaPrinter {
         val shader = android.graphics.LinearGradient(
             margin, cardTop, PAGE_WIDTH - margin, cardTop + headerH,
             intArrayOf(Color.parseColor("#7C3AED"), Color.parseColor("#4F46E5")),
+            null,
             android.graphics.Shader.TileMode.CLAMP
         )
         headerPaint.shader = shader
@@ -334,7 +335,7 @@ object NotaPrinter {
                 val photoRect = android.graphics.RectF(margin + 12f, y, margin + 12f + dw, y + dh)
                 // Photo with rounded corners
                 val photoPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-                val photoShader = android.graphics.BitmapShader(photo, android.graphics.Matrix(), android.graphics.Shader.TileMode.CLAMP)
+                val photoShader = android.graphics.BitmapShader(photo, android.graphics.Shader.TileMode.CLAMP, android.graphics.Shader.TileMode.CLAMP)
                 photoPaint.shader = photoShader
                 canvas.drawRoundRect(photoRect, 6f, 6f, photoPaint)
                 y += dh + 12f
