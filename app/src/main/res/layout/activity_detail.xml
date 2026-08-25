@@ -21,9 +21,11 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="#F3F4F6"
+        android:background="#ECEFF1"
         android:clipToPadding="false"
-        android:padding="16dp">
+        android:paddingHorizontal="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="12dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -37,69 +39,76 @@
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_printer_body">
 
-                <!-- Printer top bar -->
+                <!-- Printer surface -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:paddingHorizontal="16dp"
-                    android:paddingTop="8dp"
-                    android:paddingBottom="4dp">
+                    android:orientation="vertical">
 
-                    <!-- LED indicator -->
+                    <!-- Printer top panel -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="14dp"
+                        android:paddingTop="10dp"
+                        android:paddingBottom="8dp">
+
+                        <View
+                            android:layout_width="8dp"
+                            android:layout_height="8dp"
+                            android:background="@drawable/bg_printer_led" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="8dp"
+                            android:text="Nota Costume Printer"
+                            android:textColor="#D1D5DB"
+                            android:textSize="10sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="● READY"
+                            android:textColor="#22C55E"
+                            android:textSize="9sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Slot -->
                     <View
-                        android:layout_width="8dp"
-                        android:layout_height="8dp"
-                        android:background="@drawable/bg_printer_led" />
+                        android:layout_width="match_parent"
+                        android:layout_height="4dp"
+                        android:layout_marginHorizontal="12dp"
+                        android:background="#1F2937" />
 
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:layout_marginStart="8dp"
-                        android:text="Nota Costume"
-                        android:textColor="#9CA3AF"
-                        android:textSize="10sp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="● READY"
-                        android:textColor="#22C55E"
-                        android:textSize="9sp"
-                        android:textStyle="bold" />
                 </LinearLayout>
-
-                <!-- Printer slot (the dark gap where paper comes out) -->
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="6dp"
-                    android:layout_marginHorizontal="8dp"
-                    android:background="@drawable/bg_printer_slot_inner" />
 
                 <!-- ══ Receipt Paper ══ -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="@drawable/bg_receipt_paper_detail"
-                    android:layout_marginHorizontal="8dp"
-                    android:paddingBottom="12dp">
+                    android:background="#FFFFFF"
+                    android:layout_marginHorizontal="12dp"
+                    android:layout_marginTop="2dp"
+                    android:paddingHorizontal="2dp"
+                    android:paddingBottom="16dp">
 
-                    <!-- Top serrated edge of paper -->
+                    <!-- Zigzag top -->
                     <View
-                        android:id="@+id/topSerrated"
                         android:layout_width="match_parent"
-                        android:layout_height="8dp"
-                        android:background="@color/white" />
+                        android:layout_height="6dp"
+                        android:background="@drawable/bg_zigzag_small" />
 
                     <ImageView
                         android:id="@+id/ivPreview"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:adjustViewBounds="true"
-                        android:paddingHorizontal="2dp"
                         android:contentDescription="@string/btn_print" />
 
                 </LinearLayout>
@@ -153,4 +162,5 @@
         android:icon="@drawable/ic_print"
         android:visibility="gone"
         style="@style/Widget.Material3.Button.TonalButton" />
+
 </LinearLayout>

@@ -271,12 +271,12 @@ class FormFragment : Fragment() {
             return
         }
         val namaPenjual = b.etNamaPenjual.text.toString().trim()
-        val activeToko = TokoManager.getActive(requireContext())
+        val tokoName = b.etToko.text.toString().trim().ifBlank { getString(R.string.toko_nama) }
         if (editId > 0) {
             val nota = Nota(
                 id = editId,
                 nomor = existingNomor,
-                toko = activeToko.nama,
+                toko = tokoName,
                 tanggal = b.etTanggal.text.toString().ifBlank { fmtDate.format(Date()) },
                 catatan = b.etCatatan.text.toString().trim(),
                 dibuatPada = System.currentTimeMillis(),
@@ -292,7 +292,7 @@ class FormFragment : Fragment() {
         }
         val nota = Nota(
             nomor = db.nextNomor(),
-            toko = activeToko.nama,
+            toko = tokoName,
             tanggal = b.etTanggal.text.toString().ifBlank { fmtDate.format(Date()) },
             catatan = b.etCatatan.text.toString().trim(),
             dibuatPada = System.currentTimeMillis(),
@@ -322,6 +322,7 @@ class FormFragment : Fragment() {
     }
 
     private fun showPrintAnimation(notaId: Long) {
+        if (!isAdded) return
         val activity = requireActivity()
         val rootView = activity.findViewById<ViewGroup>(android.R.id.content)
 
@@ -349,6 +350,7 @@ class FormFragment : Fragment() {
         var progress = 0
         val progressRunnable = object : Runnable {
             override fun run() {
+                if (!isAdded) return
                 progress += 2
                 progressBar.progress = progress
                 if (progress < 100) {
@@ -360,6 +362,7 @@ class FormFragment : Fragment() {
 
         // After printing animation, show success
         Handler(Looper.getMainLooper()).postDelayed({
+            if (!isAdded) return@postDelayed
             tvStatus.text = getString(R.string.print_berhasil)
             tvSubStatus.text = getString(R.string.print_selesai)
             progressBar.visibility = View.GONE
@@ -367,6 +370,7 @@ class FormFragment : Fragment() {
 
         // Dismiss overlay and navigate to detail
         Handler(Looper.getMainLooper()).postDelayed({
+            if (!isAdded) return@postDelayed
             clearForm()
             onNotaSaved?.invoke()
 
@@ -374,9 +378,12 @@ class FormFragment : Fragment() {
                 .alpha(0f)
                 .setDuration(300)
                 .withEndAction {
-                    rootView.removeView(overlay)
+                    try {
+                        rootView.removeView(overlay)
+                    } catch (_: Exception) {}
                     val intent = Intent(requireContext(), NotaDetailActivity::class.java)
                     intent.putExtra("id", notaId)
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                     startActivity(intent)
                 }
                 .start()
