@@ -97,6 +97,45 @@
                 android:layout_height="wrap_content"
                 android:text="@string/restore_dari_file"
                 android:icon="@android:drawable/ic_menu_revert" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="24dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/pengaturan_printer"
+                android:textColor="?attr/colorPrimary"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:paddingBottom="8dp" />
+
+            <TextView
+                android:id="@+id/tvPrinterStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/printer_none"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:textSize="13sp"
+                android:layout_marginBottom="8dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSelectPrinter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/printer_select"
+                android:icon="@drawable/ic_print" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTestPrint"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="@string/btn_print"
+                android:icon="@drawable/ic_print"
+                android:visibility="gone" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

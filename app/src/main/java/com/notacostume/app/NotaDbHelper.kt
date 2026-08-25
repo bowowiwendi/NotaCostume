@@ -21,6 +21,20 @@ class NotaDbHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, 
                 // kolom sudah ada -> abaikan
             }
         }
+        // Tabel barang (untuk database produk / barcode)
+        try {
+            db.execSQL(
+                """CREATE TABLE IF NOT EXISTS $TABLE_BARANG (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    barcode TEXT,
+                    nama TEXT,
+                    harga INTEGER,
+                    stok INTEGER DEFAULT 0,
+                    kategori TEXT,
+                    ditambahkan_pada INTEGER
+                )"""
+            )
+        } catch (_: Exception) {}
     }
 
     private fun createTables(db: SQLiteDatabase) {
@@ -44,6 +58,17 @@ class NotaDbHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, 
                 nama TEXT,
                 jumlah INTEGER,
                 harga INTEGER
+            )"""
+        )
+        db.execSQL(
+            """CREATE TABLE IF NOT EXISTS $TABLE_BARANG (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                barcode TEXT,
+                nama TEXT,
+                harga INTEGER,
+                stok INTEGER DEFAULT 0,
+                kategori TEXT,
+                ditambahkan_pada INTEGER
             )"""
         )
     }
@@ -167,10 +192,67 @@ class NotaDbHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, 
         foto = getString(getColumnIndexOrThrow("foto")) ?: ""
     )
 
+    // ── Barang (Produk / Barcode) CRUD ──
+
+    fun getBarangByBarcode(barcode: String): Barang? {
+        readableDatabase.query(TABLE_BARANG, null, "barcode = ?", arrayOf(barcode), null, null, null, "1").use { c ->
+            if (!c.moveToFirst()) return null
+            return c.toBarang()
+        }
+    }
+
+    fun getBarangAll(): List<Barang> {
+        val list = mutableListOf<Barang>()
+        readableDatabase.query(TABLE_BARANG, null, null, null, null, null, "nama ASC").use { c ->
+            while (c.moveToNext()) list.add(c.toBarang())
+        }
+        return list
+    }
+
+    fun getBarangSearch(query: String): List<Barang> {
+        val list = mutableListOf<Barang>()
+        readableDatabase.query(TABLE_BARANG, null, "nama LIKE ?", arrayOf("%$query%"), null, null, "nama ASC").use { c ->
+            while (c.moveToNext()) list.add(c.toBarang())
+        }
+        return list
+    }
+
+    fun insertBarang(barang: Barang): Long {
+        return writableDatabase.insert(TABLE_BARANG, null, barang.toValues())
+    }
+
+    fun updateBarang(barang: Barang) {
+        writableDatabase.update(TABLE_BARANG, barang.toValues(), "id = ?", arrayOf(barang.id.toString()))
+    }
+
+    fun deleteBarang(id: Long): Int {
+        return writableDatabase.delete(TABLE_BARANG, "id = ?", arrayOf(id.toString()))
+    }
+
+    private fun Cursor.toBarang() = Barang(
+        id = getLong(getColumnIndexOrThrow("id")),
+        barcode = getString(getColumnIndexOrThrow("barcode")) ?: "",
+        nama = getString(getColumnIndexOrThrow("nama")) ?: "",
+        harga = getLong(getColumnIndexOrThrow("harga")),
+        stok = getInt(getColumnIndexOrThrow("stok")),
+        kategori = getString(getColumnIndexOrThrow("kategori")) ?: "",
+        ditambahkanPada = getLong(getColumnIndexOrThrow("ditambahkan_pada"))
+    )
+
+    private fun Barang.toValues() = ContentValues().apply {
+        put("barcode", barcode)
+        put("nama", nama)
+        put("harga", harga)
+        put("stok", stok)
+        put("kategori", kategori)
+        put("ditambahkan_pada", ditambahkanPada)
+    }
+
     companion object {
         private const val DB_NAME = "nota.db"
-        private const val DB_VERSION = 5
+        private const val DB_VERSION = 6
         private const val TABLE = "nota"
         private const val TABLE_ITEM = "nota_item"
+        private const val TABLE_BARANG = "barang"
     }
 }

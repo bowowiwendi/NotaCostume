@@ -114,4 +114,27 @@
     <string name="print_mohon_tunggu">Mohon tunggu sebentar</string>
     <string name="print_berhasil">Nota Berhasil Dibuat!</string>
     <string name="print_selesai">Nota sudah siap</string>
+
+    <!-- Barcode scanner strings -->
+    <string name="scan_hint">Arahkan kamera ke barcode produk</string>
+    <string name="scan_manual">Input Manual</string>
+    <string name="scan_manual_hint">Masukkan kode barang</string>
+    <string name="scan_found">Barang ditemukan: %1$s</string>
+    <string name="scan_new_title">Produk Baru</string>
+    <string name="scan_new_message">Produk dengan kode %1$s belum ada di database.\nIngin tambahkan data baru?</string>
+    <string name="scan_saved">Produk %1$s berhasil disimpan</string>
+    <string name="scan_camera_denied">Izin kamera diperlukan untuk scan barcode</string>
+    <string name="btn_scan">Scan Barcode</string>
+
+    <!-- Thermal printer strings -->
+    <string name="printer_title">Printer Termal</string>
+    <string name="printer_select">Pilih Printer Bluetooth</string>
+    <string name="printer_none">Belum ada printer dipilih</string>
+    <string name="printer_connected">Terhubung: %1$s</string>
+    <string name="printer_connecting">Menghubungkan…</string>
+    <string name="printer_success">Berhasil cetak ke printer termal</string>
+    <string name="printer_failed">Gagal cetak. Pastikan printer menyala &amp; terhubung</string>
+    <string name="printer_not_found">Printer Bluetooth tidak ditemukan. Nyalakan printer &amp; pair di pengaturan HP</string>
+    <string name="btn_print_thermal">Cetak Thermal</string>
+    <string name="pengaturan_printer">Printer Termal</string>
 </resources>

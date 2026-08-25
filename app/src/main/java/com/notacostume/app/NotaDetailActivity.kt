@@ -27,6 +27,14 @@ class NotaDetailActivity : AppCompatActivity() {
         b.btnPrint.setOnClickListener { doPrint() }
         b.btnPdf.setOnClickListener { doSavePdf() }
         b.btnShare.setOnClickListener { doShare() }
+        b.btnPrintThermal.setOnClickListener { doPrintThermal() }
+
+        // Show/hide thermal print button based on printer availability
+        if (ThermalPrinter.isAvailable(this)) {
+            b.btnPrintThermal.visibility = android.view.View.VISIBLE
+        } else {
+            b.btnPrintThermal.visibility = android.view.View.GONE
+        }
 
         val id = intent.getLongExtra("id", 0L)
         nota = db.getById(id)
@@ -74,6 +82,22 @@ class NotaDetailActivity : AppCompatActivity() {
 
     private fun doPrint() {
         nota?.let { NotaPrinter.print(this, it, getString(R.string.toko_nama)) }
+    }
+
+    private fun doPrintThermal() {
+        nota?.let { n ->
+            Toast.makeText(this, R.string.printer_connecting, Toast.LENGTH_SHORT).show()
+            Thread {
+                val ok = ThermalPrinter.printNota(this, n, getString(R.string.toko_nama))
+                runOnUiThread {
+                    if (ok) {
+                        Toast.makeText(this, R.string.printer_success, Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(this, R.string.printer_failed, Toast.LENGTH_LONG).show()
+                    }
+                }
+            }.start()
+        }
     }
 
     private fun doSavePdf() {

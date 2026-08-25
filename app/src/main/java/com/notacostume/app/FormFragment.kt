@@ -65,6 +65,18 @@ class FormFragment : Fragment() {
         }
     }
 
+    private val scanBarcode = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            val data = result.data ?: return@registerForActivityResult
+            val nama = data.getStringExtra("nama") ?: return@registerForActivityResult
+            val harga = data.getLongExtra("harga", 0L)
+            // Tambahkan item baru ke form
+            addItemRow(nama = nama, jumlah = 1, harga = harga)
+            updateSummary()
+            Toast.makeText(requireContext(), getString(R.string.scan_found, nama), Toast.LENGTH_SHORT).show()
+        }
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _b = FragmentFormBinding.inflate(inflater, container, false)
         return b.root
@@ -76,6 +88,10 @@ class FormFragment : Fragment() {
         b.etTanggal.setText(fmtDate.format(Date()))
         b.etTanggal.setOnClickListener { pickDate { d -> b.etTanggal.setText(d) } }
         b.btnTambahBarang.setOnClickListener { addItemRow(); updateSummary() }
+        b.btnScanBarcode.setOnClickListener {
+            val intent = Intent(requireContext(), ScannerActivity::class.java)
+            scanBarcode.launch(intent)
+        }
         addItemRow()
         updateSummary()
         b.btnSimpan.setOnClickListener { simpanNota() }

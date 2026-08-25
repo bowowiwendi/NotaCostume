@@ -117,6 +117,16 @@
                     android:text="@string/btn_tambah_barang"
                     app:icon="@drawable/ic_add" />
 
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnScanBarcode"
+                    style="@style/Widget.Material3.Button.OutlinedButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="@string/btn_scan"
+                    app:icon="@drawable/ic_barcode"
+                    app:iconSize="18dp" />
+
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilCatatan"
                     style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
