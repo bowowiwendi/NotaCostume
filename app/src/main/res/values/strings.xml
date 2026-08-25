@@ -108,4 +108,10 @@
     <string name="restore_dari_file">Restore dari File</string>
     <string name="restore_dari_file_summary">Pulihkan database dari file backup (.db)</string>
     <string name="bersihkan">Bersihkan</string>
+
+    <!-- Print animation strings -->
+    <string name="print_mencetak">Mencetak Nota…</string>
+    <string name="print_mohon_tunggu">Mohon tunggu sebentar</string>
+    <string name="print_berhasil">Nota Berhasil Dibuat!</string>
+    <string name="print_selesai">Nota sudah siap</string>
 </resources>

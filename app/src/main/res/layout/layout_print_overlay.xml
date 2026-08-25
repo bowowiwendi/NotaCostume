@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/printOverlay"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#99000000"
+    android:clickable="true"
+    android:focusable="true">
+
+    <LinearLayout
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:background="@drawable/bg_print_dialog"
+        android:padding="28dp">
+
+        <!-- Printer Icon -->
+        <ImageView
+            android:id="@+id/ivPrinterIcon"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:src="@drawable/ic_print_large"
+            android:contentDescription="@string/btn_print" />
+
+        <!-- Receipt paper animation area -->
+        <FrameLayout
+            android:layout_width="120dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="16dp"
+            android:clipChildren="true"
+            android:clipToPadding="true">
+
+            <View
+                android:id="@+id/receiptPaper"
+                android:layout_width="100dp"
+                android:layout_height="80dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:background="@drawable/bg_receipt_paper" />
+        </FrameLayout>
+
+        <!-- Status text -->
+        <TextView
+            android:id="@+id/tvPrintStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/print_mencetak"
+            android:textColor="#1F2937"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvPrintSubStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/print_mohon_tunggu"
+            android:textColor="#6B7280"
+            android:textSize="12sp" />
+
+        <!-- Progress bar -->
+        <ProgressBar
+            android:id="@+id/progressPrint"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_marginTop="16dp"
+            android:indeterminate="false"
+            android:max="100"
+            android:progressDrawable="@drawable/progress_print" />
+
+    </LinearLayout>
+</FrameLayout>

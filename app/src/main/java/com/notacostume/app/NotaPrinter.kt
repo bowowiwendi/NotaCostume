@@ -133,214 +133,275 @@ object NotaPrinter {
         val scale = width / PAGE_WIDTH
         canvas.save()
         canvas.scale(scale, scale)
+
+        // Background
         canvas.drawColor(Color.WHITE)
 
         val p = Paint(Paint.ANTI_ALIAS_FLAG)
-        p.color = Color.BLACK
+        val margin = 20f
+        val contentWidth = PAGE_WIDTH - margin * 2
 
-        var y = 34f
+        // ── Card shadow & background ──
+        val cardTop = 16f
+        val cardBottom = PAGE_HEIGHT - 16f
+        val cardRadius = 12f
+        val cardRect = android.graphics.RectF(margin - 4f, cardTop, PAGE_WIDTH - margin + 4f, cardBottom)
 
-        // Kop: nama toko (dari nota) atau fallback tokoNama
+        // Shadow
+        p.color = Color.parseColor("#22000000")
+        p.maskFilter = android.graphics.BlurMaskFilter(6f, android.graphics.BlurMaskFilter.Blur.NORMAL)
+        canvas.drawRoundRect(cardRect, cardRadius, cardRadius, p)
+        p.maskFilter = null
+
+        // Card fill
+        p.color = Color.WHITE
+        canvas.drawRoundRect(cardRect, cardRadius, cardRadius, p)
+
+        // ── Header (gradient purple) ──
+        val headerH = 80f
+        val headerRect = android.graphics.RectF(margin - 4f, cardTop, PAGE_WIDTH - margin + 4f, cardTop + headerH)
+        val headerPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        val shader = android.graphics.LinearGradient(
+            margin, cardTop, PAGE_WIDTH - margin, cardTop + headerH,
+            intArrayOf(Color.parseColor("#7C3AED"), Color.parseColor("#4F46E5")),
+            android.graphics.Shader.TileMode.CLAMP
+        )
+        headerPaint.shader = shader
+        canvas.drawRoundRect(headerRect, cardRadius, cardRadius, headerPaint)
+        // Fix bottom corners of header (cover with rect)
+        headerPaint.color = Color.parseColor("#4F46E5")
+        canvas.drawRect(margin - 4f, cardTop + headerH - cardRadius, PAGE_WIDTH - margin + 4f, cardTop + headerH, headerPaint)
+
+        // Toko name in header
         val kop = nota.toko.ifBlank { tokoNama }
+        p.color = Color.WHITE
         p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        p.textSize = 24f
+        p.textSize = 18f
         p.textAlign = Paint.Align.CENTER
-        canvas.drawText(kop, PAGE_WIDTH / 2, y, p)
+        canvas.drawText(kop, PAGE_WIDTH / 2, cardTop + 36f, p)
 
-        y += 24f
-        p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        p.textSize = 13f
-        canvas.drawText("NOTA PEMBELIAN", PAGE_WIDTH / 2, y, p)
-
-        y += 34f
-        p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        p.textAlign = Paint.Align.LEFT
-        p.textSize = 13f
-        canvas.drawText("No: ${nota.nomor}", 24f, y, p)
+        // Subtitle
         p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-        p.textAlign = Paint.Align.RIGHT
-        canvas.drawText("Tanggal: ${nota.tanggal}", PAGE_WIDTH - 24f, y, p)
+        p.textSize = 11f
+        p.alpha = 200
+        canvas.drawText("NOTA PEMBELIAN", PAGE_WIDTH / 2, cardTop + 56f, p)
+        p.alpha = 255
 
-        y += 30f
+        var y = cardTop + headerH + 24f
+
+        // ── Transaction info ──
+        p.color = Color.parseColor("#6B7280")
+        p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+        p.textSize = 10f
         p.textAlign = Paint.Align.LEFT
-        p.textSize = 12f
+        canvas.drawText("No. Nota", margin + 12f, y, p)
+        p.textAlign = Paint.Align.RIGHT
+        p.color = Color.parseColor("#1F2937")
+        p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        canvas.drawText(nota.nomor, PAGE_WIDTH - margin - 12f, y, p)
 
-        y += 26f
-        val rowH = 28f
-        drawTableRow(canvas, p, y, rowH, arrayOf("No", "Nama Barang", "Jml", "Harga", "Total"), bold = true, fill = true)
-        y += rowH
-        val visibleItems = nota.items.take(15)
-        for ((index, item) in visibleItems.withIndex()) {
-            drawTableRow(
-                canvas, p, y, rowH,
-                arrayOf(
-                    (index + 1).toString(),
-                    item.nama,
-                    item.jumlah.toString(),
-                    Rupiah.format(item.harga),
-                    Rupiah.format(item.total)
-                ),
-                bold = false, fill = index % 2 == 1
-            )
-            y += rowH
-        }
-        if (nota.items.size > visibleItems.size) {
-            drawTableRow(canvas, p, y, rowH, arrayOf("…", "dan ${nota.items.size - visibleItems.size} barang lain", "", "", ""), bold = false, fill = false)
-            y += rowH
-        }
+        y += 18f
+        p.color = Color.parseColor("#6B7280")
+        p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+        p.textSize = 10f
+        p.textAlign = Paint.Align.LEFT
+        canvas.drawText("Tanggal", margin + 12f, y, p)
+        p.textAlign = Paint.Align.RIGHT
+        p.color = Color.parseColor("#1F2937")
+        canvas.drawText(nota.tanggal, PAGE_WIDTH - margin - 12f, y, p)
+
+        y += 14f
+        // Dashed separator
+        drawDashedLine(canvas, margin + 12f, y, PAGE_WIDTH - margin - 12f, y, Color.parseColor("#D1D5DB"), 1f)
+        y += 18f
+
+        // ── Items section title ──
+        p.color = Color.parseColor("#6B7280")
+        p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        p.textSize = 10f
+        p.textAlign = Paint.Align.LEFT
+        canvas.drawText("DAFTAR BARANG", margin + 12f, y, p)
         y += 16f
 
-        drawKv(canvas, p, "Total Harga", Rupiah.format(nota.total), y, emphasize = true)
-        y += 34f
-
-        if (nota.catatan.isNotBlank()) {
+        // ── Items ──
+        val visibleItems = nota.items.take(12)
+        for ((index, item) in visibleItems.withIndex()) {
+            // Item name
+            p.color = Color.parseColor("#1F2937")
             p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
             p.textSize = 11f
-            val lines = wrapText(nota.catatan, p, PAGE_WIDTH - 48f)
-            for (line in lines) {
-                canvas.drawText(line, 24f, y, p)
-                y += 18f
+            p.textAlign = Paint.Align.LEFT
+            canvas.drawText(item.nama, margin + 12f, y, p)
+
+            // Qty x Harga
+            p.color = Color.parseColor("#9CA3AF")
+            p.textSize = 9f
+            val qtyPrice = "${item.jumlah} x ${Rupiah.format(item.harga)}"
+            canvas.drawText(qtyPrice, margin + 12f, y + 13f, p)
+
+            // Total price (right)
+            p.color = Color.parseColor("#1F2937")
+            p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+            p.textSize = 11f
+            p.textAlign = Paint.Align.RIGHT
+            canvas.drawText(Rupiah.format(item.total), PAGE_WIDTH - margin - 12f, y, p)
+
+            y += 28f
+
+            // Dotted separator between items
+            if (index < visibleItems.size - 1) {
+                drawDottedLine(canvas, margin + 12f, y - 6f, PAGE_WIDTH - margin - 12f, y - 6f, Color.parseColor("#E5E7EB"), 1f)
             }
-            y += 12f
+        }
+        if (nota.items.size > visibleItems.size) {
+            p.color = Color.parseColor("#9CA3AF")
+            p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.ITALIC)
+            p.textSize = 10f
+            p.textAlign = Paint.Align.LEFT
+            canvas.drawText("… dan ${nota.items.size - visibleItems.size} barang lainnya", margin + 12f, y, p)
+            y += 18f
         }
 
-        if (nota.foto.isNotBlank() && y < PAGE_HEIGHT - 190f) {
+        y += 8f
+        drawDashedLine(canvas, margin + 12f, y, PAGE_WIDTH - margin - 12f, y, Color.parseColor("#D1D5DB"), 1f)
+        y += 20f
+
+        // ── Total section (highlighted) ──
+        val totalBgTop = y - 6f
+        val totalBgBottom = y + 32f
+        val totalBgRect = android.graphics.RectF(margin + 8f, totalBgTop, PAGE_WIDTH - margin - 8f, totalBgBottom)
+        p.color = Color.parseColor("#F0FDF4")
+        canvas.drawRoundRect(totalBgRect, 8f, 8f, p)
+        // Green border
+        p.color = Color.parseColor("#22C55E")
+        p.style = Paint.Style.STROKE
+        p.strokeWidth = 1f
+        canvas.drawRoundRect(totalBgRect, 8f, 8f, p)
+        p.style = Paint.Style.FILL
+
+        p.color = Color.parseColor("#166534")
+        p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+        p.textSize = 12f
+        p.textAlign = Paint.Align.LEFT
+        canvas.drawText("Total Pembayaran", margin + 20f, y + 18f, p)
+
+        p.color = Color.parseColor("#166534")
+        p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        p.textSize = 16f
+        p.textAlign = Paint.Align.RIGHT
+        canvas.drawText(Rupiah.format(nota.total), PAGE_WIDTH - margin - 20f, y + 18f, p)
+
+        y = totalBgBottom + 18f
+
+        // ── Catatan ──
+        if (nota.catatan.isNotBlank()) {
+            drawDashedLine(canvas, margin + 12f, y, PAGE_WIDTH - margin - 12f, y, Color.parseColor("#D1D5DB"), 1f)
+            y += 14f
+            p.color = Color.parseColor("#6B7280")
+            p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+            p.textSize = 10f
+            p.textAlign = Paint.Align.LEFT
+            canvas.drawText("Catatan", margin + 12f, y, p)
+            y += 14f
+            p.color = Color.parseColor("#374151")
+            p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+            p.textSize = 10f
+            val lines = wrapText(nota.catatan, p, contentWidth - 24f)
+            for (line in lines) {
+                canvas.drawText(line, margin + 12f, y, p)
+                y += 14f
+            }
+            y += 8f
+        }
+
+        // ── Foto ──
+        if (nota.foto.isNotBlank() && y < PAGE_HEIGHT - 160f) {
             val photo = BitmapFactory.decodeFile(nota.foto)
             if (photo != null) {
+                drawDashedLine(canvas, margin + 12f, y, PAGE_WIDTH - margin - 12f, y, Color.parseColor("#D1D5DB"), 1f)
+                y += 14f
+                p.color = Color.parseColor("#6B7280")
                 p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-                p.textSize = 11f
+                p.textSize = 10f
                 p.textAlign = Paint.Align.LEFT
-                canvas.drawText("Bukti Foto:", 24f, y, p)
-                y += 6f
-                val maxW = PAGE_WIDTH - 48f
-                val maxH = 90f
+                canvas.drawText("Bukti Foto", margin + 12f, y, p)
+                y += 8f
+                val maxW = contentWidth - 24f
+                val maxH = 80f
                 val sc = minOf(maxW / photo.width.toFloat(), maxH / photo.height.toFloat())
                 val dw = photo.width * sc
                 val dh = photo.height * sc
-                canvas.drawBitmap(
-                    photo, null,
-                    android.graphics.RectF(24f, y, 24f + dw, y + dh),
-                    null
-                )
-                y += dh + 10f
+                val photoRect = android.graphics.RectF(margin + 12f, y, margin + 12f + dw, y + dh)
+                // Photo with rounded corners
+                val photoPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+                val photoShader = android.graphics.BitmapShader(photo, android.graphics.Matrix(), android.graphics.Shader.TileMode.CLAMP)
+                photoPaint.shader = photoShader
+                canvas.drawRoundRect(photoRect, 6f, 6f, photoPaint)
+                y += dh + 12f
             }
         }
 
-        val bottom = PAGE_HEIGHT - 42f
-        val sigRight = PAGE_WIDTH - 24f
-        val sigLeft = PAGE_WIDTH - 120f
+        // ── Signature area ──
+        val sigAreaTop = y
+        val sigBottom = cardBottom - 20f
         if (nota.ttdPenjual.isNotBlank()) {
             val sig = BitmapFactory.decodeFile(nota.ttdPenjual)
             if (sig != null) {
-                // Skala agar tinggi ttd ~36f, lebar proporsional, tapi tidak melebihi area garis
-                val targetH = 36f
+                drawDashedLine(canvas, margin + 12f, sigAreaTop, PAGE_WIDTH - margin - 12f, sigAreaTop, Color.parseColor("#D1D5DB"), 1f)
+                val sigLeft = PAGE_WIDTH - margin - 100f
+                val sigRight = PAGE_WIDTH - margin - 12f
+                val targetH = 32f
                 val sc = minOf(targetH / sig.height.toFloat(), (sigRight - sigLeft) / sig.width.toFloat())
                 val dw = sig.width * sc
                 val dh = sig.height * sc
-                // Letakkan ttd agar bagian bawahnya menempel ke garis (bottom)
-                val sigTop = bottom - dh
+                val sigTop = sigBottom - dh - 14f
                 canvas.drawBitmap(
                     sig, null,
-                    android.graphics.RectF(sigRight - dw, sigTop, sigRight, bottom),
+                    android.graphics.RectF(sigRight - dw, sigTop, sigRight, sigBottom - 14f),
                     null
                 )
+                // Garis ttd
+                p.color = Color.parseColor("#9CA3AF")
+                p.strokeWidth = 0.8f
+                canvas.drawLine(sigLeft, sigBottom - 14f, sigRight, sigBottom - 14f, p)
+                // Label
+                p.color = Color.parseColor("#6B7280")
+                p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+                p.textSize = 9f
+                p.textAlign = Paint.Align.RIGHT
+                canvas.drawText("Penjual", sigRight, sigBottom - dh - 18f, p)
+                val namaP = nota.namaPenjual.ifBlank { "" }
+                if (namaP.isNotBlank()) {
+                    p.textSize = 9f
+                    canvas.drawText(namaP, sigRight, sigBottom, p)
+                }
             }
         }
-        // Label "Penjual" statis DI ATAS garis (menandakan ini tempat ttd penjual)
-        val penjualLabel = "Penjual"
+
+        // ── Footer ──
+        p.color = Color.parseColor("#9CA3AF")
         p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-        p.textSize = 10f
-        p.textAlign = Paint.Align.RIGHT
-        if (nota.ttdPenjual.isNotBlank()) {
-            val sig = BitmapFactory.decodeFile(nota.ttdPenjual)
-            if (sig != null) {
-                val targetH = 36f
-                val sc = minOf(targetH / sig.height.toFloat(), (sigRight - sigLeft) / sig.width.toFloat())
-                val dhActual = sig.height * sc
-                canvas.drawText(penjualLabel, sigRight, bottom - dhActual - 4f, p)
-            } else {
-                canvas.drawText(penjualLabel, sigRight, bottom - 4f, p)
-            }
-        } else {
-            canvas.drawText(penjualLabel, sigRight, bottom - 4f, p)
-        }
-        p.strokeWidth = 1f
-        canvas.drawLine(sigLeft, bottom, sigRight, bottom, p)
-        // Nama penjual (input user) DI BAWAH garis
-        val namaP = nota.namaPenjual.ifBlank { "" }
-        if (namaP.isNotBlank()) {
-            p.textSize = 10f
-            canvas.drawText(namaP, sigRight, bottom + 14f, p)
-        }
+        p.textSize = 8f
+        p.textAlign = Paint.Align.CENTER
+        canvas.drawText("Terima kasih atas kunjungan Anda", PAGE_WIDTH / 2, cardBottom - 10f, p)
 
         canvas.restore()
     }
 
-    private fun drawTableRow(
-        canvas: Canvas,
-        p: Paint,
-        top: Float,
-        rowH: Float,
-        cells: Array<String>,
-        bold: Boolean,
-        fill: Boolean
-    ) {
-        val left = 24f
-        val right = PAGE_WIDTH - 24f
-        val total = right - left
-        val frac = floatArrayOf(0.09f, 0.36f, 0.12f, 0.22f, 0.21f)
-        val x = FloatArray(frac.size + 1)
-        x[0] = left
-        for (i in frac.indices) x[i + 1] = x[i] + total * frac[i]
-
-        p.typeface = Typeface.create(Typeface.DEFAULT, if (bold) Typeface.BOLD else Typeface.NORMAL)
-        p.textSize = 11f
-
-        if (fill) {
-            p.color = Color.parseColor("#EEEEEE")
-            canvas.drawRect(left, top, right, top + rowH, p)
-            p.color = Color.BLACK
-        }
-
-        p.strokeWidth = 1f
-        for (i in 0..x.size - 2) {
-            canvas.drawLine(x[i], top, x[i], top + rowH, p)
-        }
-        canvas.drawLine(x[x.size - 1], top, x[x.size - 1], top + rowH, p)
-        canvas.drawLine(left, top, right, top, p)
-        canvas.drawLine(left, top + rowH, right, top + rowH, p)
-
-        val baseline = top + (rowH + p.textSize) / 2f - 2f
-        val aligns = arrayOf(
-            Paint.Align.CENTER, Paint.Align.LEFT, Paint.Align.CENTER, Paint.Align.RIGHT, Paint.Align.RIGHT
-        )
-        for (i in cells.indices) {
-            p.textAlign = aligns[i]
-            val tx = when (aligns[i]) {
-                Paint.Align.LEFT -> x[i] + 6f
-                Paint.Align.RIGHT -> x[i + 1] - 6f
-                else -> (x[i] + x[i + 1]) / 2f
-            }
-            canvas.drawText(cells[i], tx, baseline, p)
-        }
-        p.textAlign = Paint.Align.LEFT
+    private fun drawDashedLine(canvas: Canvas, startX: Float, startY: Float, endX: Float, endY: Float, color: Int, strokeWidth: Float) {
+        val p = Paint(Paint.ANTI_ALIAS_FLAG)
+        p.color = color
+        p.strokeWidth = strokeWidth
+        p.pathEffect = android.graphics.DashPathEffect(floatArrayOf(8f, 6f), 0f)
+        canvas.drawLine(startX, startY, endX, endY, p)
     }
 
-    private fun drawKv(
-        canvas: Canvas,
-        p: Paint,
-        label: String,
-        value: String,
-        y: Float,
-        emphasize: Boolean = false
-    ) {
-        p.textSize = if (emphasize) 15f else 12f
-        p.typeface = Typeface.create(Typeface.DEFAULT, if (emphasize) Typeface.BOLD else Typeface.NORMAL)
-        p.textAlign = Paint.Align.LEFT
-        canvas.drawText(label, 24f, y, p)
-        p.textAlign = Paint.Align.RIGHT
-        canvas.drawText(value, PAGE_WIDTH - 24f, y, p)
-        p.textAlign = Paint.Align.LEFT
+    private fun drawDottedLine(canvas: Canvas, startX: Float, startY: Float, endX: Float, endY: Float, color: Int, strokeWidth: Float) {
+        val p = Paint(Paint.ANTI_ALIAS_FLAG)
+        p.color = color
+        p.strokeWidth = strokeWidth
+        p.pathEffect = android.graphics.DashPathEffect(floatArrayOf(2f, 4f), 0f)
+        canvas.drawLine(startX, startY, endX, endY, p)
     }
 
     private fun wrapText(text: String, p: Paint, maxWidth: Float): List<String> {

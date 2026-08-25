@@ -1,14 +1,22 @@
 package com.notacostume.app
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.DecelerateInterpolator
 import android.widget.EditText
+import android.widget.ImageView
+import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -279,10 +287,8 @@ class FormFragment : Fragment() {
             foto = fotoPath,
             items = items
         )
-        db.insert(nota)
-        Toast.makeText(requireContext(), R.string.nota_disimpan, Toast.LENGTH_SHORT).show()
-        clearForm()
-        onNotaSaved?.invoke()
+        val insertedId = db.insert(nota)
+        showPrintAnimation(insertedId)
     }
 
     private fun clearForm() {
@@ -299,5 +305,80 @@ class FormFragment : Fragment() {
         b.llItems.removeAllViews()
         addItemRow()
         updateSummary()
+    }
+
+    private fun showPrintAnimation(notaId: Long) {
+        val activity = requireActivity()
+        val rootView = activity.findViewById<ViewGroup>(android.R.id.content)
+
+        val overlay = LayoutInflater.from(requireContext())
+            .inflate(R.layout.layout_print_overlay, rootView, false)
+        rootView.addView(overlay)
+
+        val ivPrinter = overlay.findViewById<ImageView>(R.id.ivPrinterIcon)
+        val tvStatus = overlay.findViewById<TextView>(R.id.tvPrintStatus)
+        val tvSubStatus = overlay.findViewById<TextView>(R.id.tvPrintSubStatus)
+        val progressBar = overlay.findViewById<ProgressBar>(R.id.progressPrint)
+        val receiptPaper = overlay.findViewById<View>(R.id.receiptPaper)
+
+        // Start receipt paper slide-up animation
+        receiptPaper.translationY = 80f
+        receiptPaper.animate()
+            .translationY(0f)
+            .setDuration(800)
+            .setInterpolator(DecelerateInterpolator())
+            .start()
+
+        // Animate progress bar
+        val progressHandler = Handler(Looper.getMainLooper())
+        var progress = 0
+        val progressRunnable = object : Runnable {
+            override fun run() {
+                progress += 2
+                progressBar.progress = progress
+                if (progress < 100) {
+                    progressHandler.postDelayed(this, 40)
+                }
+            }
+        }
+        progressHandler.postDelayed(progressRunnable, 300)
+
+        // After printing animation, show success
+        Handler(Looper.getMainLooper()).postDelayed({
+            ivPrinter.setImageResource(R.drawable.ic_check_circle_large)
+            tvStatus.text = getString(R.string.print_berhasil)
+            tvSubStatus.text = getString(R.string.print_selesai)
+            progressBar.visibility = View.GONE
+
+            // Success animation
+            ivPrinter.scaleX = 0f
+            ivPrinter.scaleY = 0f
+            ivPrinter.animate()
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(400)
+                .setInterpolator(AccelerateDecelerateInterpolator())
+                .start()
+        }, 2200)
+
+        // Dismiss overlay and navigate to detail
+        Handler(Looper.getMainLooper()).postDelayed({
+            // Clear form for next nota
+            clearForm()
+            onNotaSaved?.invoke()
+
+            // Animate overlay out
+            overlay.animate()
+                .alpha(0f)
+                .setDuration(300)
+                .withEndAction {
+                    rootView.removeView(overlay)
+                    // Navigate to detail
+                    val intent = Intent(requireContext(), NotaDetailActivity::class.java)
+                    intent.putExtra("id", notaId)
+                    startActivity(intent)
+                }
+                .start()
+        }, 3200)
     }
 }
