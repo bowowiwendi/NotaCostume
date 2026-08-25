@@ -4,6 +4,7 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
+import android.view.animation.DecelerateInterpolator
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -67,9 +68,19 @@ class NotaDetailActivity : AppCompatActivity() {
 
     private fun render(n: Nota) {
         b.toolbar.subtitle = n.nomor
-        val width = resources.displayMetrics.widthPixels - (32 * resources.displayMetrics.density).toInt()
+        val width = resources.displayMetrics.widthPixels - (48 * resources.displayMetrics.density).toInt()
         val bmp = NotaPrinter.preview(n, getString(R.string.toko_nama), width)
         b.ivPreview.setImageBitmap(bmp)
+
+        // Animate receipt sliding out of printer
+        b.ivPreview.translationY = -300f
+        b.ivPreview.alpha = 0f
+        b.ivPreview.animate()
+            .translationY(0f)
+            .alpha(1f)
+            .setDuration(800)
+            .setInterpolator(DecelerateInterpolator())
+            .start()
     }
 
     private fun doPrint() {

@@ -143,7 +143,8 @@ object NotaPrinter {
 
         // ── Card shadow & background ──
         val cardTop = 16f
-        val cardBottom = PAGE_HEIGHT - 16f
+        val zigzagH = 12f
+        val cardBottom = PAGE_HEIGHT - 16f - zigzagH
         val cardRadius = 12f
         val cardRect = android.graphics.RectF(margin - 4f, cardTop, PAGE_WIDTH - margin + 4f, cardBottom)
 
@@ -156,6 +157,9 @@ object NotaPrinter {
         // Card fill
         p.color = Color.WHITE
         canvas.drawRoundRect(cardRect, cardRadius, cardRadius, p)
+
+        // ── Zigzag / Gerigi at bottom ──
+        drawZigzag(canvas, margin - 4f, cardBottom, PAGE_WIDTH - margin + 4f, cardBottom + zigzagH, Color.WHITE)
 
         // ── Header (gradient purple) ──
         val headerH = 80f
@@ -315,9 +319,13 @@ object NotaPrinter {
             y += 8f
         }
 
-        // ── Foto ──
-        if (nota.foto.isNotBlank() && y < PAGE_HEIGHT - 160f) {
-            val photo = BitmapFactory.decodeFile(nota.foto)
+        // ── Foto (larger & clearer) ──
+        if (nota.foto.isNotBlank() && y < PAGE_HEIGHT - 180f) {
+            val opts = BitmapFactory.Options().apply {
+                inPreferredConfig = Bitmap.Config.ARGB_8888
+                inSampleSize = 1
+            }
+            val photo = BitmapFactory.decodeFile(nota.foto, opts)
             if (photo != null) {
                 drawDashedLine(canvas, margin + 12f, y, PAGE_WIDTH - margin - 12f, y, Color.parseColor("#D1D5DB"), 1f)
                 y += 14f
@@ -328,16 +336,24 @@ object NotaPrinter {
                 canvas.drawText("Bukti Foto", margin + 12f, y, p)
                 y += 8f
                 val maxW = contentWidth - 24f
-                val maxH = 80f
+                val maxH = 120f
                 val sc = minOf(maxW / photo.width.toFloat(), maxH / photo.height.toFloat())
                 val dw = photo.width * sc
                 val dh = photo.height * sc
                 val photoRect = android.graphics.RectF(margin + 12f, y, margin + 12f + dw, y + dh)
+                // Photo border
+                p.color = Color.parseColor("#E5E7EB")
+                p.style = Paint.Style.STROKE
+                p.strokeWidth = 1f
+                canvas.drawRoundRect(photoRect, 6f, 6f, p)
+                p.style = Paint.Style.FILL
                 // Photo with rounded corners
-                val photoPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-                val photoShader = android.graphics.BitmapShader(photo, android.graphics.Shader.TileMode.CLAMP, android.graphics.Shader.TileMode.CLAMP)
-                photoPaint.shader = photoShader
-                canvas.drawRoundRect(photoRect, 6f, 6f, photoPaint)
+                canvas.save()
+                val path = android.graphics.Path()
+                path.addRoundRect(photoRect, 6f, 6f, android.graphics.Path.Direction.CW)
+                canvas.clipPath(path)
+                canvas.drawBitmap(photo, null, photoRect, null)
+                canvas.restore()
                 y += dh + 12f
             }
         }
@@ -387,6 +403,30 @@ object NotaPrinter {
         canvas.drawText("Terima kasih atas kunjungan Anda", PAGE_WIDTH / 2, cardBottom - 10f, p)
 
         canvas.restore()
+    }
+
+    private fun drawZigzag(canvas: Canvas, left: Float, top: Float, right: Float, bottom: Float, color: Int) {
+        val zigWidth = 10f
+        val zigHeight = 5f
+        val path = android.graphics.Path()
+        path.moveTo(left, top)
+        var x = left
+        var up = true
+        while (x < right) {
+            val targetX = minOf(x + zigWidth, right)
+            val peakY = if (up) top - zigHeight else top + zigHeight
+            path.lineTo((x + targetX) / 2f, peakY)
+            path.lineTo(targetX, top)
+            x = targetX
+            up = !up
+        }
+        path.lineTo(right, bottom)
+        path.lineTo(left, bottom)
+        path.close()
+
+        val zigPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        zigPaint.color = color
+        canvas.drawPath(path, zigPaint)
     }
 
     private fun drawDashedLine(canvas: Canvas, startX: Float, startY: Float, endX: Float, endY: Float, color: Int, strokeWidth: Float) {
