@@ -305,7 +305,7 @@ class FormFragment : Fragment() {
             val insertedId = db.insert(nota)
             showPrintAnimation(insertedId)
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), "Gagal simpan: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), "Gagal simpan nota: ${e.localizedMessage ?: e.javaClass.simpleName}", Toast.LENGTH_LONG).show()
         }
     }
 

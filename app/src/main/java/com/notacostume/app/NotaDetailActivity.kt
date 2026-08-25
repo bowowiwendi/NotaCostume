@@ -81,7 +81,7 @@ class NotaDetailActivity : AppCompatActivity() {
             val bmp = NotaPrinter.preview(n, getString(R.string.toko_nama), width)
             b.ivPreview.setImageBitmap(bmp)
         } catch (e: Exception) {
-            Toast.makeText(this, "Gagal render nota: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Gagal render nota: ${e.localizedMessage ?: e.javaClass.simpleName}", Toast.LENGTH_LONG).show()
             finish()
         }
     }

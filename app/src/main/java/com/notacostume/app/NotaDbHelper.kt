@@ -13,28 +13,28 @@ class NotaDbHelper(context: Context) : SQLiteOpenHelper(context, DB_NAME, null, 
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // Pastikan kolom selalu ada walau DB lama (tanpa guard versi)
-        for (col in arrayOf("nama_penjual TEXT", "ttd_penjual TEXT", "foto TEXT")) {
-            try {
-                db.execSQL("ALTER TABLE $TABLE ADD COLUMN $col")
-            } catch (_: Exception) {
-                // kolom sudah ada -> abaikan
+        if (oldVersion < 5) {
+            for (col in arrayOf("nama_penjual TEXT", "ttd_penjual TEXT", "foto TEXT")) {
+                try {
+                    db.execSQL("ALTER TABLE $TABLE ADD COLUMN $col")
+                } catch (_: Exception) {}
             }
         }
-        // Tabel barang (untuk database produk / barcode)
-        try {
-            db.execSQL(
-                """CREATE TABLE IF NOT EXISTS $TABLE_BARANG (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    barcode TEXT,
-                    nama TEXT,
-                    harga INTEGER,
-                    stok INTEGER DEFAULT 0,
-                    kategori TEXT,
-                    ditambahkan_pada INTEGER
-                )"""
-            )
-        } catch (_: Exception) {}
+        if (oldVersion < 6) {
+            try {
+                db.execSQL(
+                    """CREATE TABLE IF NOT EXISTS $TABLE_BARANG (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        barcode TEXT,
+                        nama TEXT,
+                        harga INTEGER,
+                        stok INTEGER DEFAULT 0,
+                        kategori TEXT,
+                        ditambahkan_pada INTEGER
+                    )"""
+                )
+            } catch (_: Exception) {}
+        }
     }
 
     private fun createTables(db: SQLiteDatabase) {
