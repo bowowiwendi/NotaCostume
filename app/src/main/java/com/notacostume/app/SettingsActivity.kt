@@ -143,7 +143,7 @@ class SettingsActivity : AppCompatActivity() {
             tv.text = getString(R.string.printer_connected, name)
             btnTest.visibility = android.view.View.VISIBLE
         } else {
-            tv.text = R.string.printer_none
+            tv.text = getString(R.string.printer_none)
             btnTest.visibility = android.view.View.GONE
         }
     }
