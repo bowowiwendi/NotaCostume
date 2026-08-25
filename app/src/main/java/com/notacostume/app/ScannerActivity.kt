@@ -71,19 +71,20 @@ class ScannerActivity : AppCompatActivity() {
                             scanner.process(image)
                                 .addOnSuccessListener { barcodes ->
                                     for (barcode in barcodes) {
-                                        val raw = barcode.rawValue ?: continue
-                                        if (raw.isBlank()) continue
+                                        val raw = try {
+                                            barcode.displayValue ?: barcode.rawValue
+                                        } catch (_: Exception) { null }
+                                        if (raw.isNullOrBlank()) continue
+                                        // Pastikan hanya ambil yang berupa teks ASCII
+                                        val clean = raw.filter { it.code in 32..126 || it == '\n' }
+                                        if (clean.isBlank()) continue
                                         if (!scanned) {
                                             scanned = true
-                                            runOnUiThread { onBarcodeScanned(raw) }
+                                            runOnUiThread { onBarcodeScanned(clean) }
                                         }
                                     }
                                 }
-                                .addOnFailureListener { e ->
-                                    // Binary/decode error — biarkan user scan ulang
-                                    runOnUiThread {
-                                        Toast.makeText(this, "Scan gagal: ${e.localizedMessage ?: "coba lagi"}", Toast.LENGTH_SHORT).show()
-                                    }
+                                .addOnFailureListener {
                                     scanned = false
                                 }
                                 .addOnCompleteListener { imageProxy.close() }
