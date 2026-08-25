@@ -265,17 +265,34 @@ class FormFragment : Fragment() {
     }
 
     private fun simpanNota() {
-        val items = readItems()
-        if (items.isEmpty()) {
-            Toast.makeText(requireContext(), R.string.isi_lengkap, Toast.LENGTH_SHORT).show()
-            return
-        }
-        val namaPenjual = b.etNamaPenjual.text.toString().trim()
-        val tokoName = b.etToko.text.toString().trim().ifBlank { getString(R.string.toko_nama) }
-        if (editId > 0) {
+        try {
+            val items = readItems()
+            if (items.isEmpty()) {
+                Toast.makeText(requireContext(), R.string.isi_lengkap, Toast.LENGTH_SHORT).show()
+                return
+            }
+            val namaPenjual = b.etNamaPenjual.text.toString().trim()
+            val tokoName = b.etToko.text.toString().trim().ifBlank { getString(R.string.toko_nama) }
+            if (editId > 0) {
+                val nota = Nota(
+                    id = editId,
+                    nomor = existingNomor,
+                    toko = tokoName,
+                    tanggal = b.etTanggal.text.toString().ifBlank { fmtDate.format(Date()) },
+                    catatan = b.etCatatan.text.toString().trim(),
+                    dibuatPada = System.currentTimeMillis(),
+                    namaPenjual = namaPenjual,
+                    ttdPenjual = ttdPath,
+                    foto = fotoPath,
+                    items = items
+                )
+                db.update(nota)
+                Toast.makeText(requireContext(), R.string.nota_diubah, Toast.LENGTH_SHORT).show()
+                requireActivity().finish()
+                return
+            }
             val nota = Nota(
-                id = editId,
-                nomor = existingNomor,
+                nomor = db.nextNomor(),
                 toko = tokoName,
                 tanggal = b.etTanggal.text.toString().ifBlank { fmtDate.format(Date()) },
                 catatan = b.etCatatan.text.toString().trim(),
@@ -285,24 +302,11 @@ class FormFragment : Fragment() {
                 foto = fotoPath,
                 items = items
             )
-            db.update(nota)
-            Toast.makeText(requireContext(), R.string.nota_diubah, Toast.LENGTH_SHORT).show()
-            requireActivity().finish()
-            return
+            val insertedId = db.insert(nota)
+            showPrintAnimation(insertedId)
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Gagal simpan: ${e.message}", Toast.LENGTH_LONG).show()
         }
-        val nota = Nota(
-            nomor = db.nextNomor(),
-            toko = tokoName,
-            tanggal = b.etTanggal.text.toString().ifBlank { fmtDate.format(Date()) },
-            catatan = b.etCatatan.text.toString().trim(),
-            dibuatPada = System.currentTimeMillis(),
-            namaPenjual = namaPenjual,
-            ttdPenjual = ttdPath,
-            foto = fotoPath,
-            items = items
-        )
-        val insertedId = db.insert(nota)
-        showPrintAnimation(insertedId)
     }
 
     private fun clearForm() {
@@ -381,10 +385,12 @@ class FormFragment : Fragment() {
                     try {
                         rootView.removeView(overlay)
                     } catch (_: Exception) {}
-                    val intent = Intent(requireContext(), NotaDetailActivity::class.java)
-                    intent.putExtra("id", notaId)
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    startActivity(intent)
+                    try {
+                        val intent = Intent(requireContext(), NotaDetailActivity::class.java)
+                        intent.putExtra("id", notaId)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                        startActivity(intent)
+                    } catch (_: Exception) {}
                 }
                 .start()
         }, 3500)

@@ -114,10 +114,11 @@ object NotaPrinter {
     }
 
     fun preview(nota: Nota, tokoNama: String, targetWidth: Int): Bitmap {
-        val scale = targetWidth.toFloat() / PAGE_WIDTH
+        val safeWidth = targetWidth.coerceIn(200, 1200)
+        val scale = safeWidth.toFloat() / PAGE_WIDTH
         val bmp = Bitmap.createBitmap(
-            (PAGE_WIDTH * scale).toInt(),
-            (PAGE_HEIGHT * scale).toInt(),
+            (PAGE_WIDTH * scale).toInt().coerceAtLeast(1),
+            (PAGE_HEIGHT * scale).toInt().coerceAtLeast(1),
             Bitmap.Config.ARGB_8888
         )
         drawNota(Canvas(bmp), nota, tokoNama, PAGE_WIDTH * scale)
@@ -148,11 +149,16 @@ object NotaPrinter {
         val cardRadius = 12f
         val cardRect = android.graphics.RectF(margin - 4f, cardTop, PAGE_WIDTH - margin + 4f, cardBottom)
 
-        // Shadow
-        p.color = Color.parseColor("#22000000")
-        p.maskFilter = android.graphics.BlurMaskFilter(6f, android.graphics.BlurMaskFilter.Blur.NORMAL)
-        canvas.drawRoundRect(cardRect, cardRadius, cardRadius, p)
-        p.maskFilter = null
+        // Shadow (wrapped in try-catch for devices that don't support BlurMaskFilter)
+        try {
+            p.color = Color.parseColor("#22000000")
+            p.maskFilter = android.graphics.BlurMaskFilter(6f, android.graphics.BlurMaskFilter.Blur.NORMAL)
+            canvas.drawRoundRect(cardRect, cardRadius, cardRadius, p)
+            p.maskFilter = null
+        } catch (_: Exception) {
+            p.color = Color.parseColor("#11000000")
+            canvas.drawRoundRect(cardRect, cardRadius, cardRadius, p)
+        }
 
         // Card fill
         p.color = Color.WHITE
@@ -406,19 +412,19 @@ object NotaPrinter {
     }
 
     private fun drawZigzag(canvas: Canvas, left: Float, top: Float, right: Float, bottom: Float, color: Int) {
-        val zigWidth = 10f
-        val zigHeight = 5f
+        val zigWidth = 12f
+        val zigHeight = 6f
         val path = android.graphics.Path()
         path.moveTo(left, top)
         var x = left
-        var up = true
         while (x < right) {
-            val targetX = minOf(x + zigWidth, right)
-            val peakY = if (up) top - zigHeight else top + zigHeight
-            path.lineTo((x + targetX) / 2f, peakY)
-            path.lineTo(targetX, top)
-            x = targetX
-            up = !up
+            val nextX = minOf(x + zigWidth, right)
+            // Square zigzag: up-flat-down pattern
+            path.lineTo(x, top)
+            path.lineTo(x, top - zigHeight)
+            path.lineTo(nextX, top - zigHeight)
+            path.lineTo(nextX, top)
+            x = nextX
         }
         path.lineTo(right, bottom)
         path.lineTo(left, bottom)

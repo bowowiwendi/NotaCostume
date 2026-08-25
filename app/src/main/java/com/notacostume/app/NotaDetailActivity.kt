@@ -74,10 +74,16 @@ class NotaDetailActivity : AppCompatActivity() {
     }
 
     private fun render(n: Nota) {
-        b.toolbar.subtitle = n.nomor
-        val width = resources.displayMetrics.widthPixels - (48 * resources.displayMetrics.density).toInt()
-        val bmp = NotaPrinter.preview(n, getString(R.string.toko_nama), width)
-        b.ivPreview.setImageBitmap(bmp)
+        try {
+            b.toolbar.subtitle = n.nomor
+            val density = resources.displayMetrics.density
+            val width = (resources.displayMetrics.widthPixels - (32 * density).toInt())
+            val bmp = NotaPrinter.preview(n, getString(R.string.toko_nama), width)
+            b.ivPreview.setImageBitmap(bmp)
+        } catch (e: Exception) {
+            Toast.makeText(this, "Gagal render nota: ${e.message}", Toast.LENGTH_LONG).show()
+            finish()
+        }
     }
 
     private fun doPrint() {
