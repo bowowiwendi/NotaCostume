@@ -77,7 +77,7 @@
             android:layout_height="36dp"
             android:layout_marginStart="4dp"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:src="@drawable/ic_hapus"
+            android:src="@drawable/ic_delete"
             android:contentDescription="Hapus"
             app:tint="#EF4444" />
     </LinearLayout>
