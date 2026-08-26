@@ -93,6 +93,11 @@ class SettingsActivity : AppCompatActivity() {
                         }
                     }.start()
                 }
+            // ── Data Barang ──
+            findViewById<MaterialButton>(R.id.btnDataBarang)
+                .setOnClickListener {
+                    startActivity(android.content.Intent(this, BarangListActivity::class.java))
+                }
         } catch (e: Exception) {
             Toast.makeText(this, "Settings error: ${e.message}", Toast.LENGTH_LONG).show()
             finish()

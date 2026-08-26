@@ -412,22 +412,21 @@ object NotaPrinter {
     }
 
     private fun drawZigzag(canvas: Canvas, left: Float, top: Float, right: Float, bottom: Float, color: Int) {
-        val zigWidth = 12f
-        val zigHeight = 6f
+        val zigWidth = 16f
+        val zigHeight = 8f
         val path = android.graphics.Path()
-        path.moveTo(left, top)
+        path.moveTo(left, bottom)
         var x = left
         while (x < right) {
             val nextX = minOf(x + zigWidth, right)
-            // Square zigzag: up-flat-down pattern
+            val midX = (x + nextX) / 2f
             path.lineTo(x, top)
-            path.lineTo(x, top - zigHeight)
-            path.lineTo(nextX, top - zigHeight)
-            path.lineTo(nextX, top)
+            path.lineTo(midX, top)
+            path.lineTo(midX, bottom)
+            path.lineTo(nextX, bottom)
             x = nextX
         }
         path.lineTo(right, bottom)
-        path.lineTo(left, bottom)
         path.close()
 
         val zigPaint = Paint(Paint.ANTI_ALIAS_FLAG)

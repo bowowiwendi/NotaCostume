@@ -136,6 +136,17 @@
                 android:text="@string/btn_print"
                 android:icon="@drawable/ic_print"
                 android:visibility="gone" />
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="24dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDataBarang"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Data Barang"
+                android:icon="@drawable/ic_barcode" />
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
