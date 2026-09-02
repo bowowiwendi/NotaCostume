@@ -135,278 +135,378 @@ object NotaPrinter {
         canvas.save()
         canvas.scale(scale, scale)
 
-        // Background
+        // Background clean white — no outer gray
         canvas.drawColor(Color.WHITE)
 
         val p = Paint(Paint.ANTI_ALIAS_FLAG)
-        val margin = 20f
+        val margin = 18f
         val contentWidth = PAGE_WIDTH - margin * 2
 
-        // ── Card shadow & background ──
-        val cardTop = 16f
-        val zigzagH = 12f
-        val cardBottom = PAGE_HEIGHT - 16f - zigzagH
-        val cardRadius = 12f
-        val cardRect = android.graphics.RectF(margin - 4f, cardTop, PAGE_WIDTH - margin + 4f, cardBottom)
+        // ── Card clean white tanpa garis abu / shadow berat ──
+        val cardTop = 12f
+        val zigzagH = 10f
+        val cardBottom = PAGE_HEIGHT - 12f - zigzagH
+        val cardRadius = 16f
+        val cardRect = android.graphics.RectF(margin, cardTop, PAGE_WIDTH - margin, cardBottom)
 
-        // Shadow (wrapped in try-catch for devices that don't support BlurMaskFilter)
-        try {
-            p.color = Color.parseColor("#22000000")
-            p.maskFilter = android.graphics.BlurMaskFilter(6f, android.graphics.BlurMaskFilter.Blur.NORMAL)
-            canvas.drawRoundRect(cardRect, cardRadius, cardRadius, p)
-            p.maskFilter = null
-        } catch (_: Exception) {
-            p.color = Color.parseColor("#11000000")
-            canvas.drawRoundRect(cardRect, cardRadius, cardRadius, p)
-        }
+        // Subtle soft shadow (hampir tidak terlihat, bukan garis abu tegas)
+        p.color = Color.parseColor("#0A000000")
+        canvas.drawRoundRect(
+            android.graphics.RectF(cardRect.left + 1f, cardRect.top + 2f, cardRect.right - 1f, cardRect.bottom + 1f),
+            cardRadius, cardRadius, p
+        )
 
-        // Card fill
+        // Card fill pure white, no stroke
         p.color = Color.WHITE
         canvas.drawRoundRect(cardRect, cardRadius, cardRadius, p)
 
-        // ── Zigzag / Gerigi at bottom ──
-        drawZigzag(canvas, margin - 4f, cardBottom, PAGE_WIDTH - margin + 4f, cardBottom + zigzagH, Color.WHITE)
+        // ── Zigzag bottom — clean ──
+        drawZigzag(canvas, margin, cardBottom, PAGE_WIDTH - margin, cardBottom + zigzagH, Color.WHITE)
 
-        // ── Header (gradient purple) ──
-        val headerH = 80f
-        val headerRect = android.graphics.RectF(margin - 4f, cardTop, PAGE_WIDTH - margin + 4f, cardTop + headerH)
+        // ── Header: gradient purple elegan, sudut atas rounded ──
+        val headerH = 74f
+        val headerRect = android.graphics.RectF(margin, cardTop, PAGE_WIDTH - margin, cardTop + headerH)
         val headerPaint = Paint(Paint.ANTI_ALIAS_FLAG)
         val shader = android.graphics.LinearGradient(
             margin, cardTop, PAGE_WIDTH - margin, cardTop + headerH,
-            intArrayOf(Color.parseColor("#7C3AED"), Color.parseColor("#4F46E5")),
-            null,
+            intArrayOf(Color.parseColor("#7C3AED"), Color.parseColor("#5B21B6")),
+            floatArrayOf(0f, 1f),
             android.graphics.Shader.TileMode.CLAMP
         )
         headerPaint.shader = shader
         canvas.drawRoundRect(headerRect, cardRadius, cardRadius, headerPaint)
-        // Fix bottom corners of header (cover with rect)
-        headerPaint.color = Color.parseColor("#4F46E5")
-        canvas.drawRect(margin - 4f, cardTop + headerH - cardRadius, PAGE_WIDTH - margin + 4f, cardTop + headerH, headerPaint)
+        // Tutup sudut bawah header agar rata
+        headerPaint.shader = null
+        headerPaint.color = Color.parseColor("#5B21B6")
+        canvas.drawRect(margin, cardTop + headerH - cardRadius, PAGE_WIDTH - margin, cardTop + headerH, headerPaint)
 
-        // Toko name in header
+        // Header accent line tipis putih transparan
+        p.color = Color.parseColor("#33FFFFFF")
+        p.strokeWidth = 1f
+        canvas.drawLine(margin + 16f, cardTop + headerH - 1f, PAGE_WIDTH - margin - 16f, cardTop + headerH - 1f, p)
+
+        // Toko name
         val kop = nota.toko.ifBlank { tokoNama }
         p.color = Color.WHITE
         p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        p.textSize = 18f
+        p.textSize = 17f
         p.textAlign = Paint.Align.CENTER
-        canvas.drawText(kop, PAGE_WIDTH / 2, cardTop + 36f, p)
+        // slight shadow for readability
+        p.setShadowLayer(2f, 0f, 1f, Color.parseColor("#33000000"))
+        canvas.drawText(kop.uppercase(), PAGE_WIDTH / 2, cardTop + 34f, p)
+        p.clearShadowLayer()
 
         // Subtitle
         p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-        p.textSize = 11f
-        p.alpha = 200
-        canvas.drawText("NOTA PEMBELIAN", PAGE_WIDTH / 2, cardTop + 56f, p)
+        p.textSize = 9.5f
+        p.alpha = 210
+        p.letterSpacing = 0.12f
+        canvas.drawText("NOTA PEMBELIAN", PAGE_WIDTH / 2, cardTop + 53f, p)
         p.alpha = 255
+        p.letterSpacing = 0f
 
-        var y = cardTop + headerH + 24f
+        var y = cardTop + headerH + 20f
 
-        // ── Transaction info ──
-        p.color = Color.parseColor("#6B7280")
+        // ── Info transaksi — tanpa garis abu tebal, hanya spacing + tipis sangat halus ──
+        // Latar kotak info halus
+        val infoTop = y - 8f
+        val infoBottom = y + 34f
+        val infoRect = android.graphics.RectF(margin + 10f, infoTop, PAGE_WIDTH - margin - 10f, infoBottom)
+        p.color = Color.parseColor("#F8F7FF")
+        canvas.drawRoundRect(infoRect, 10f, 10f, p)
+
+        p.color = Color.parseColor("#64748B")
         p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-        p.textSize = 10f
+        p.textSize = 9f
         p.textAlign = Paint.Align.LEFT
-        canvas.drawText("No. Nota", margin + 12f, y, p)
+        p.letterSpacing = 0.04f
+        canvas.drawText("No. Nota", margin + 22f, y + 2f, p)
         p.textAlign = Paint.Align.RIGHT
-        p.color = Color.parseColor("#1F2937")
-        p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        canvas.drawText(nota.nomor, PAGE_WIDTH - margin - 12f, y, p)
-
-        y += 18f
-        p.color = Color.parseColor("#6B7280")
-        p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-        p.textSize = 10f
-        p.textAlign = Paint.Align.LEFT
-        canvas.drawText("Tanggal", margin + 12f, y, p)
-        p.textAlign = Paint.Align.RIGHT
-        p.color = Color.parseColor("#1F2937")
-        canvas.drawText(nota.tanggal, PAGE_WIDTH - margin - 12f, y, p)
-
-        y += 14f
-        // Dashed separator
-        drawDashedLine(canvas, margin + 12f, y, PAGE_WIDTH - margin - 12f, y, Color.parseColor("#D1D5DB"), 1f)
-        y += 18f
-
-        // ── Items section title ──
-        p.color = Color.parseColor("#6B7280")
+        p.color = Color.parseColor("#1E293B")
         p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
         p.textSize = 10f
+        canvas.drawText(nota.nomor, PAGE_WIDTH - margin - 22f, y + 2f, p)
+
+        y += 18f
+        p.color = Color.parseColor("#64748B")
+        p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+        p.textSize = 9f
         p.textAlign = Paint.Align.LEFT
-        canvas.drawText("DAFTAR BARANG", margin + 12f, y, p)
+        canvas.drawText("Tanggal", margin + 22f, y + 2f, p)
+        p.textAlign = Paint.Align.RIGHT
+        p.color = Color.parseColor("#1E293B")
+        p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+        p.textSize = 10f
+        canvas.drawText(nota.tanggal, PAGE_WIDTH - margin - 22f, y + 2f, p)
+
+        y = infoBottom + 16f
+
+        // ── Judul section dengan aksen ungu ──
+        p.color = Color.parseColor("#7C3AED")
+        p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        p.textSize = 9f
+        p.textAlign = Paint.Align.LEFT
+        p.letterSpacing = 0.08f
+        canvas.drawText("RINCIAN BARANG", margin + 14f, y, p)
+        p.letterSpacing = 0f
+        // garis aksen ungu kecil
+        p.color = Color.parseColor("#7C3AED")
+        p.strokeWidth = 2f
+        p.strokeCap = Paint.Cap.ROUND
+        canvas.drawLine(margin + 14f, y + 5f, margin + 14f + 28f, y + 5f, p)
         y += 16f
 
-        // ── Items ──
-        val visibleItems = nota.items.take(12)
+        // ── Items — tanpa dotted/dashed abu, hanya spacing bersih ──
+        val visibleItems = nota.items.take(14)
         for ((index, item) in visibleItems.withIndex()) {
-            // Item name
-            p.color = Color.parseColor("#1F2937")
-            p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+            // Nama barang — bold, jelas
+            p.color = Color.parseColor("#0F172A")
+            p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             p.textSize = 11f
             p.textAlign = Paint.Align.LEFT
-            canvas.drawText(item.nama, margin + 12f, y, p)
+            // truncate if too long
+            var nama = item.nama
+            if (p.measureText(nama) > contentWidth - 110f) {
+                while (nama.length > 3 && p.measureText("$nama…") > contentWidth - 110f) {
+                    nama = nama.dropLast(1)
+                }
+                nama = "$nama…"
+            }
+            canvas.drawText(nama, margin + 14f, y, p)
 
-            // Qty x Harga
-            p.color = Color.parseColor("#9CA3AF")
+            // Qty x Harga — muted
+            p.color = Color.parseColor("#94A3B8")
+            p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
             p.textSize = 9f
-            val qtyPrice = "${item.jumlah} x ${Rupiah.format(item.harga)}"
-            canvas.drawText(qtyPrice, margin + 12f, y + 13f, p)
+            val qtyPrice = "${item.jumlah} × ${Rupiah.format(item.harga)}"
+            canvas.drawText(qtyPrice, margin + 14f, y + 12f, p)
 
-            // Total price (right)
-            p.color = Color.parseColor("#1F2937")
+            // Total kanan — tegas
+            p.color = Color.parseColor("#1E293B")
             p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             p.textSize = 11f
             p.textAlign = Paint.Align.RIGHT
-            canvas.drawText(Rupiah.format(item.total), PAGE_WIDTH - margin - 12f, y, p)
+            canvas.drawText(Rupiah.format(item.total), PAGE_WIDTH - margin - 14f, y + 4f, p)
 
-            y += 28f
+            y += 26f
 
-            // Dotted separator between items
+            // Separator ultra halus, hampir tak terlihat (bukan garis abu tegas)
             if (index < visibleItems.size - 1) {
-                drawDottedLine(canvas, margin + 12f, y - 6f, PAGE_WIDTH - margin - 12f, y - 6f, Color.parseColor("#E5E7EB"), 1f)
+                p.color = Color.parseColor("#F8FAFC")
+                p.strokeWidth = 0.7f
+                // only draw if enough space left
+                if (y < PAGE_HEIGHT - 200f) {
+                    canvas.drawLine(margin + 14f, y - 4f, PAGE_WIDTH - margin - 14f, y - 4f, p)
+                }
             }
         }
         if (nota.items.size > visibleItems.size) {
-            p.color = Color.parseColor("#9CA3AF")
+            p.color = Color.parseColor("#94A3B8")
             p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.ITALIC)
-            p.textSize = 10f
+            p.textSize = 9f
             p.textAlign = Paint.Align.LEFT
-            canvas.drawText("… dan ${nota.items.size - visibleItems.size} barang lainnya", margin + 12f, y, p)
-            y += 18f
+            canvas.drawText("… dan ${nota.items.size - visibleItems.size} barang lainnya", margin + 14f, y, p)
+            y += 16f
         }
 
-        y += 8f
-        drawDashedLine(canvas, margin + 12f, y, PAGE_WIDTH - margin - 12f, y, Color.parseColor("#D1D5DB"), 1f)
-        y += 20f
-
-        // ── Total section (highlighted) ──
-        val totalBgTop = y - 6f
-        val totalBgBottom = y + 32f
-        val totalBgRect = android.graphics.RectF(margin + 8f, totalBgTop, PAGE_WIDTH - margin - 8f, totalBgBottom)
-        p.color = Color.parseColor("#F0FDF4")
-        canvas.drawRoundRect(totalBgRect, 8f, 8f, p)
-        // Green border
-        p.color = Color.parseColor("#22C55E")
-        p.style = Paint.Style.STROKE
+        // Garis pemisah halus sebelum total — bukan dashed abu
+        y += 4f
+        // Double thin line accent
+        p.color = Color.parseColor("#EDE9FE")
         p.strokeWidth = 1f
-        canvas.drawRoundRect(totalBgRect, 8f, 8f, p)
-        p.style = Paint.Style.FILL
+        canvas.drawLine(margin + 14f, y, PAGE_WIDTH - margin - 14f, y, p)
+        p.color = Color.parseColor("#F5F3FF")
+        p.strokeWidth = 1f
+        canvas.drawLine(margin + 14f, y + 3f, PAGE_WIDTH - margin - 14f, y + 3f, p)
+        y += 14f
 
-        p.color = Color.parseColor("#166534")
+        // ── Total — desain elegan ungu muda, tanpa border hijau tebal ──
+        val totalBgTop = y
+        val totalBgBottom = y + 42f
+        val totalBgRect = android.graphics.RectF(margin + 10f, totalBgTop, PAGE_WIDTH - margin - 10f, totalBgBottom)
+        // Gradient soft purple
+        val totalShader = android.graphics.LinearGradient(
+            totalBgRect.left, totalBgTop, totalBgRect.right, totalBgBottom,
+            intArrayOf(Color.parseColor("#F5F3FF"), Color.parseColor("#EDE9FE")),
+            null, android.graphics.Shader.TileMode.CLAMP
+        )
+        val totalPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+        totalPaint.shader = totalShader
+        canvas.drawRoundRect(totalBgRect, 12f, 12f, totalPaint)
+        // Left accent
+        p.color = Color.parseColor("#7C3AED")
+        p.strokeWidth = 3f
+        canvas.drawLine(totalBgRect.left + 2f, totalBgTop + 8f, totalBgRect.left + 2f, totalBgBottom - 8f, p)
+
+        p.color = Color.parseColor("#4C1D95")
         p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-        p.textSize = 12f
+        p.textSize = 11f
         p.textAlign = Paint.Align.LEFT
-        canvas.drawText("Total Pembayaran", margin + 20f, y + 18f, p)
+        p.letterSpacing = 0.02f
+        canvas.drawText("Total Pembayaran", margin + 26f, y + 18f, p)
+        // small label jumlah item
+        p.color = Color.parseColor("#7C3AED")
+        p.textSize = 8.5f
+        p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+        canvas.drawText("${nota.items.size} item", margin + 26f, y + 30f, p)
 
-        p.color = Color.parseColor("#166534")
+        p.color = Color.parseColor("#4C1D95")
         p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        p.textSize = 16f
+        p.textSize = 17f
         p.textAlign = Paint.Align.RIGHT
-        canvas.drawText(Rupiah.format(nota.total), PAGE_WIDTH - margin - 20f, y + 18f, p)
+        p.letterSpacing = 0f
+        canvas.drawText(Rupiah.format(nota.total), PAGE_WIDTH - margin - 22f, y + 27f, p)
 
         y = totalBgBottom + 18f
 
-        // ── Catatan ──
+        // ── Catatan — kotak elegan tanpa garis abu ──
         if (nota.catatan.isNotBlank()) {
-            drawDashedLine(canvas, margin + 12f, y, PAGE_WIDTH - margin - 12f, y, Color.parseColor("#D1D5DB"), 1f)
-            y += 14f
-            p.color = Color.parseColor("#6B7280")
-            p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-            p.textSize = 10f
-            p.textAlign = Paint.Align.LEFT
-            canvas.drawText("Catatan", margin + 12f, y, p)
-            y += 14f
-            p.color = Color.parseColor("#374151")
-            p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-            p.textSize = 10f
-            val lines = wrapText(nota.catatan, p, contentWidth - 24f)
-            for (line in lines) {
-                canvas.drawText(line, margin + 12f, y, p)
-                y += 14f
+            val noteLines = wrapText(nota.catatan, Paint().apply { textSize = 10f }, contentWidth - 48f)
+            val noteH = 22f + noteLines.size * 13f + 12f
+            if (y + noteH < PAGE_HEIGHT - 140f) {
+                val noteTop = y
+                val noteBottom = y + noteH
+                val noteRect = android.graphics.RectF(margin + 10f, noteTop, PAGE_WIDTH - margin - 10f, noteBottom)
+                p.color = Color.parseColor("#FFFBEB")
+                canvas.drawRoundRect(noteRect, 10f, 10f, p)
+                // left accent amber
+                p.color = Color.parseColor("#F59E0B")
+                canvas.drawLine(noteRect.left + 2f, noteTop + 8f, noteRect.left + 2f, noteBottom - 8f, p)
+
+                p.color = Color.parseColor("#92400E")
+                p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+                p.textSize = 9f
+                p.textAlign = Paint.Align.LEFT
+                p.letterSpacing = 0.06f
+                canvas.drawText("CATATAN", margin + 26f, y + 15f, p)
+                p.letterSpacing = 0f
+                y += 24f
+                p.color = Color.parseColor("#78350F")
+                p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+                p.textSize = 10f
+                for (line in noteLines) {
+                    canvas.drawText(line, margin + 26f, y, p)
+                    y += 13f
+                }
+                y = noteBottom + 10f
             }
-            y += 8f
         }
 
-        // ── Foto (larger & clearer) ──
-        if (nota.foto.isNotBlank() && y < PAGE_HEIGHT - 180f) {
+        // ── Foto bukti — tanpa border abu, rounded elegan + shadow halus ──
+        if (nota.foto.isNotBlank() && y < PAGE_HEIGHT - 170f) {
             val opts = BitmapFactory.Options().apply {
                 inPreferredConfig = Bitmap.Config.ARGB_8888
                 inSampleSize = 1
             }
             val photo = BitmapFactory.decodeFile(nota.foto, opts)
             if (photo != null) {
-                drawDashedLine(canvas, margin + 12f, y, PAGE_WIDTH - margin - 12f, y, Color.parseColor("#D1D5DB"), 1f)
-                y += 14f
-                p.color = Color.parseColor("#6B7280")
+                y += 4f
+                p.color = Color.parseColor("#64748B")
                 p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-                p.textSize = 10f
+                p.textSize = 9f
                 p.textAlign = Paint.Align.LEFT
-                canvas.drawText("Bukti Foto", margin + 12f, y, p)
+                p.letterSpacing = 0.06f
+                canvas.drawText("BUKTI FOTO", margin + 14f, y, p)
+                p.letterSpacing = 0f
                 y += 8f
-                val maxW = contentWidth - 24f
-                val maxH = 120f
+                val maxW = contentWidth - 20f
+                val maxH = 110f
                 val sc = minOf(maxW / photo.width.toFloat(), maxH / photo.height.toFloat())
                 val dw = photo.width * sc
                 val dh = photo.height * sc
-                val photoRect = android.graphics.RectF(margin + 12f, y, margin + 12f + dw, y + dh)
-                // Photo border
-                p.color = Color.parseColor("#E5E7EB")
-                p.style = Paint.Style.STROKE
-                p.strokeWidth = 1f
-                canvas.drawRoundRect(photoRect, 6f, 6f, p)
-                p.style = Paint.Style.FILL
-                // Photo with rounded corners
+                val photoRect = android.graphics.RectF(margin + 14f, y, margin + 14f + dw, y + dh)
+                // shadow halus di bawah foto
+                p.color = Color.parseColor("#0F000000")
+                canvas.drawRoundRect(
+                    android.graphics.RectF(photoRect.left + 1f, photoRect.top + 2f, photoRect.right + 1f, photoRect.bottom + 2f),
+                    10f, 10f, p
+                )
+                // clip rounded
                 canvas.save()
                 val path = android.graphics.Path()
-                path.addRoundRect(photoRect, 6f, 6f, android.graphics.Path.Direction.CW)
+                path.addRoundRect(photoRect, 10f, 10f, android.graphics.Path.Direction.CW)
                 canvas.clipPath(path)
                 canvas.drawBitmap(photo, null, photoRect, null)
                 canvas.restore()
-                y += dh + 12f
+                y += dh + 14f
             }
         }
 
-        // ── Signature area ──
-        val sigAreaTop = y
-        val sigBottom = cardBottom - 20f
+        // ── Tanda tangan — tanpa garis abu tebal, hanya thin light ──
+        val sigBottom = cardBottom - 18f
         if (nota.ttdPenjual.isNotBlank()) {
             val sig = BitmapFactory.decodeFile(nota.ttdPenjual)
             if (sig != null) {
-                drawDashedLine(canvas, margin + 12f, sigAreaTop, PAGE_WIDTH - margin - 12f, sigAreaTop, Color.parseColor("#D1D5DB"), 1f)
-                val sigLeft = PAGE_WIDTH - margin - 100f
-                val sigRight = PAGE_WIDTH - margin - 12f
-                val targetH = 32f
+                val sigLeft = PAGE_WIDTH - margin - 110f
+                val sigRight = PAGE_WIDTH - margin - 14f
+                val targetH = 34f
                 val sc = minOf(targetH / sig.height.toFloat(), (sigRight - sigLeft) / sig.width.toFloat())
                 val dw = sig.width * sc
                 val dh = sig.height * sc
-                val sigTop = sigBottom - dh - 14f
+                val sigTop = sigBottom - dh - 16f
+                // Draw signature
                 canvas.drawBitmap(
                     sig, null,
-                    android.graphics.RectF(sigRight - dw, sigTop, sigRight, sigBottom - 14f),
+                    android.graphics.RectF(sigRight - dw, sigTop, sigRight, sigBottom - 16f),
                     null
                 )
-                // Garis ttd
-                p.color = Color.parseColor("#9CA3AF")
+                // Garis ttd halus — bukan abu tebal
+                p.color = Color.parseColor("#E2E8F0")
                 p.strokeWidth = 0.8f
-                canvas.drawLine(sigLeft, sigBottom - 14f, sigRight, sigBottom - 14f, p)
+                canvas.drawLine(sigLeft, sigBottom - 16f, sigRight, sigBottom - 16f, p)
                 // Label
-                p.color = Color.parseColor("#6B7280")
+                p.color = Color.parseColor("#64748B")
                 p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-                p.textSize = 9f
+                p.textSize = 8.5f
                 p.textAlign = Paint.Align.RIGHT
-                canvas.drawText("Penjual", sigRight, sigBottom - dh - 18f, p)
+                p.letterSpacing = 0.04f
+                canvas.drawText("Penjual", sigRight, sigBottom - dh - 20f, p)
+                p.letterSpacing = 0f
                 val namaP = nota.namaPenjual.ifBlank { "" }
                 if (namaP.isNotBlank()) {
-                    p.textSize = 9f
-                    canvas.drawText(namaP, sigRight, sigBottom, p)
+                    p.color = Color.parseColor("#1E293B")
+                    p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+                    p.textSize = 9.5f
+                    canvas.drawText(namaP, sigRight, sigBottom - 2f, p)
+                    // underline nama? no
+                } else {
+                    p.color = Color.parseColor("#94A3B8")
+                    p.textSize = 8f
+                    p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+                    canvas.drawText("(tanda tangan)", sigRight, sigBottom - 2f, p)
                 }
             }
+        } else if (nota.namaPenjual.isNotBlank() && y < sigBottom - 40f) {
+            // Jika tidak ada ttd tapi ada nama penjual, tampilkan placeholder garis
+            val sigLeft = PAGE_WIDTH - margin - 110f
+            val sigRight = PAGE_WIDTH - margin - 14f
+            p.color = Color.parseColor("#E2E8F0")
+            p.strokeWidth = 0.8f
+            canvas.drawLine(sigLeft, sigBottom - 16f, sigRight, sigBottom - 16f, p)
+            p.color = Color.parseColor("#64748B")
+            p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+            p.textSize = 8.5f
+            p.textAlign = Paint.Align.RIGHT
+            canvas.drawText("Penjual", sigRight, sigBottom - 30f, p)
+            p.color = Color.parseColor("#1E293B")
+            p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+            p.textSize = 9.5f
+            canvas.drawText(nota.namaPenjual, sigRight, sigBottom - 2f, p)
         }
 
-        // ── Footer ──
-        p.color = Color.parseColor("#9CA3AF")
+        // ── Footer — minimal, tanpa garis abu ──
+        // thin divider above footer — sangat halus
+        p.color = Color.parseColor("#F1F5F9")
+        p.strokeWidth = 0.7f
+        canvas.drawLine(margin + 14f, cardBottom - 24f, PAGE_WIDTH - margin - 14f, cardBottom - 24f, p)
+
+        p.color = Color.parseColor("#94A3B8")
         p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
-        p.textSize = 8f
+        p.textSize = 7.5f
         p.textAlign = Paint.Align.CENTER
-        canvas.drawText("Terima kasih atas kunjungan Anda", PAGE_WIDTH / 2, cardBottom - 10f, p)
+        p.letterSpacing = 0.06f
+        canvas.drawText("Terima kasih atas kepercayaan Anda ♡", PAGE_WIDTH / 2, cardBottom - 12f, p)
+        p.letterSpacing = 0f
 
         canvas.restore()
     }

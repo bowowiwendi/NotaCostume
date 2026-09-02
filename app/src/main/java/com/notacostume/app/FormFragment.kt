@@ -19,6 +19,7 @@ import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.notacostume.app.databinding.FragmentFormBinding
@@ -41,6 +42,8 @@ class FormFragment : Fragment() {
     private var existingNomor: String = ""
     private var fotoPath: String = ""
     private var ttdPath: String = ""
+    private var pendingCameraFile: File? = null
+    private var pendingCameraUri: Uri? = null
     var onNotaSaved: (() -> Unit)? = null
 
     companion object {
@@ -54,15 +57,35 @@ class FormFragment : Fragment() {
         if (uri != null) {
             val dest = File(requireContext().filesDir, "foto_${System.currentTimeMillis()}.jpg")
             try {
+                // Hapus foto lama jika ada agar tidak menumpuk file sampah
+                File(fotoPath).takeIf { it.exists() && fotoPath.isNotBlank() }?.delete()
                 requireContext().contentResolver.openInputStream(uri)?.use { input ->
                     FileOutputStream(dest).use { output -> input.copyTo(output) }
                 }
                 fotoPath = dest.absolutePath
                 showFotoPreview()
             } catch (_: Exception) {
+                dest.delete()
                 Toast.makeText(requireContext(), R.string.export_failed, Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private val takeFoto = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success && pendingCameraFile != null && pendingCameraFile!!.exists()) {
+            // Hapus foto lama
+            val old = File(fotoPath)
+            if (fotoPath.isNotBlank() && old.exists() && old.absolutePath != pendingCameraFile!!.absolutePath) {
+                old.delete()
+            }
+            fotoPath = pendingCameraFile!!.absolutePath
+            showFotoPreview()
+        } else {
+            // Gagal / dibatalkan -> hapus file temp kosong
+            pendingCameraFile?.takeIf { it.exists() }?.delete()
+        }
+        pendingCameraFile = null
+        pendingCameraUri = null
     }
 
     private val scanBarcode = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -97,9 +120,7 @@ class FormFragment : Fragment() {
         b.btnSimpan.setOnClickListener { simpanNota() }
         b.btnTtd.setOnClickListener { showTtdDialog() }
         b.btnHapusTtd.setOnClickListener { hapusTtd() }
-        b.btnTambahFoto.setOnClickListener {
-            pickFoto.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-        }
+        b.btnTambahFoto.setOnClickListener { showFotoOptions() }
         b.btnHapusFoto.setOnClickListener { hapusFoto() }
 
         // Dropdown nama toko (prediksi + ketik manual)
@@ -227,7 +248,40 @@ class FormFragment : Fragment() {
     private fun hapusFoto() {
         File(fotoPath).takeIf { it.exists() }?.delete()
         fotoPath = ""
+        pendingCameraFile?.takeIf { it.exists() }?.delete()
+        pendingCameraFile = null
+        pendingCameraUri = null
         showFotoPreview()
+    }
+
+    private fun showFotoOptions() {
+        val options = arrayOf(
+            getString(R.string.foto_pilih_kamera),
+            getString(R.string.foto_pilih_galeri)
+        )
+        AlertDialog.Builder(requireContext())
+            .setTitle(R.string.foto_pilih_judul)
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> launchCamera()
+                    1 -> pickFoto.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                }
+            }
+            .setNegativeButton(R.string.batal, null)
+            .show()
+    }
+
+    private fun launchCamera() {
+        try {
+            val ctx = requireContext()
+            val file = File(ctx.filesDir, "foto_${System.currentTimeMillis()}.jpg")
+            val uri = FileProvider.getUriForFile(ctx, "${ctx.packageName}.fileprovider", file)
+            pendingCameraFile = file
+            pendingCameraUri = uri
+            takeFoto.launch(uri)
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Gagal membuka kamera: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+        }
     }
 
     private fun hapusTtd() {

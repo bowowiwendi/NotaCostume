@@ -95,6 +95,9 @@
     <string name="label_foto">Bukti Foto Barang</string>
     <string name="btn_tambah_foto">Tambah Foto</string>
     <string name="btn_hapus_foto">Hapus Foto</string>
+    <string name="foto_pilih_kamera">Ambil dengan Kamera</string>
+    <string name="foto_pilih_galeri">Pilih dari Galeri</string>
+    <string name="foto_pilih_judul">Tambah Bukti Foto</string>
     <string name="label_ttd">Tanda Tangan Penjual</string>
     <string name="btn_ttd">Buat Tanda Tangan</string>
     <string name="btn_ttd_hapus">Hapus Tanda Tangan</string>

@@ -3,4 +3,9 @@
     <cache-path
         name="shared_nota"
         path="nota/" />
+    <!-- Untuk foto bukti kamera -->
+    <cache-path name="foto_cache" path="." />
+    <files-path name="foto_files" path="." />
+    <external-files-path name="foto_external" path="." />
+    <external-cache-path name="foto_external_cache" path="." />
 </paths>
