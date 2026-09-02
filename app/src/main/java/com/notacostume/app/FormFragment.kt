@@ -1,6 +1,8 @@
 package com.notacostume.app
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
@@ -19,6 +21,7 @@ import android.widget.Toast
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
 import com.google.android.material.datepicker.MaterialDatePicker
@@ -86,6 +89,14 @@ class FormFragment : Fragment() {
         }
         pendingCameraFile = null
         pendingCameraUri = null
+    }
+
+    private val requestCameraPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) {
+            launchCameraInternal()
+        } else {
+            Toast.makeText(requireContext(), getString(R.string.scan_camera_denied), Toast.LENGTH_LONG).show()
+        }
     }
 
     private val scanBarcode = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -263,7 +274,7 @@ class FormFragment : Fragment() {
             .setTitle(R.string.foto_pilih_judul)
             .setItems(options) { _, which ->
                 when (which) {
-                    0 -> launchCamera()
+                    0 -> checkCameraPermissionAndLaunch()
                     1 -> pickFoto.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 }
             }
@@ -271,7 +282,29 @@ class FormFragment : Fragment() {
             .show()
     }
 
-    private fun launchCamera() {
+    private fun checkCameraPermissionAndLaunch() {
+        val ctx = requireContext()
+        when {
+            ContextCompat.checkSelfPermission(ctx, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED -> {
+                launchCameraInternal()
+            }
+            shouldShowRequestPermissionRationale(Manifest.permission.CAMERA) -> {
+                AlertDialog.Builder(ctx)
+                    .setTitle(getString(R.string.foto_pilih_kamera))
+                    .setMessage("Aplikasi membutuhkan izin kamera untuk mengambil foto bukti langsung. Izinkan akses kamera?")
+                    .setPositiveButton("Izinkan") { _, _ ->
+                        requestCameraPermission.launch(Manifest.permission.CAMERA)
+                    }
+                    .setNegativeButton(R.string.batal, null)
+                    .show()
+            }
+            else -> {
+                requestCameraPermission.launch(Manifest.permission.CAMERA)
+            }
+        }
+    }
+
+    private fun launchCameraInternal() {
         try {
             val ctx = requireContext()
             val file = File(ctx.filesDir, "foto_${System.currentTimeMillis()}.jpg")
@@ -283,6 +316,9 @@ class FormFragment : Fragment() {
             Toast.makeText(requireContext(), "Gagal membuka kamera: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
         }
     }
+
+    // Wrapper untuk kompatibilitas jika dipanggil dari luar
+    private fun launchCamera() = checkCameraPermissionAndLaunch()
 
     private fun hapusTtd() {
         AlertDialog.Builder(requireContext())
